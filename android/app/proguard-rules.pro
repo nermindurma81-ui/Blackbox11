@@ -1,0 +1,3 @@
+-keep class com.blackboxmax.domain.model.** { *; }
+-keep class com.blackboxmax.data.network.dto.** { *; }
+-dontwarn javax.annotation.**

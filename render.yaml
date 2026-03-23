@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: blackbox-ai-max
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    autoDeploy: true
+    healthCheckPath: /api/system/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20

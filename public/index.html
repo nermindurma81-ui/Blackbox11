@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackBox AI MAX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--bg2:#0a0a0a;--card:#111;--card2:#0d0d0d;
+  --bdr:#1e1e1e;--bdr2:#2a2a2a;
+  --red:#ff3c3c;--orange:#ff8c00;--cyan:#00e5ff;--green:#00e676;
+  --purple:#9c60ff;--yellow:#f5c842;
+  --t:#f0f0f0;--t2:#888;--t3:#444;--t4:#1e1e1e;
+}
+body{background:var(--bg);color:var(--t);font-family:'Outfit',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+input,select,textarea{font-family:'Outfit',sans-serif;color:var(--t)}
+a{color:inherit;text-decoration:none}
+
+/* ── SIDEBAR ──────────────────────────────────────── */
+#sidebar{
+  position:fixed;left:0;top:0;width:230px;height:100vh;
+  background:var(--bg2);border-right:1px solid #1a1a1a;
+  display:flex;flex-direction:column;z-index:100;overflow-y:auto;
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+}
+#sidebar::-webkit-scrollbar{width:3px}
+#mob-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.75);z-index:99;
+  backdrop-filter:blur(2px);
+}
+#mob-overlay.active{display:block}
+#mob-toggle{
+  display:none;position:fixed;top:14px;left:14px;z-index:101;
+  width:42px;height:42px;background:var(--card);
+  border:1px solid var(--bdr);border-radius:10px;
+  cursor:pointer;flex-direction:column;
+  align-items:center;justify-content:center;gap:5px;
+}
+#mob-toggle span{
+  display:block;width:20px;height:2px;
+  background:var(--t);border-radius:2px;
+  transition:all .2s ease;
+}
+#mob-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+#mob-toggle.open span:nth-child(2){opacity:0;width:0}
+#mob-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+@media(max-width:1024px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  #mob-toggle{display:flex}
+  #main{margin-left:0!important;padding:16px 14px;padding-top:64px}
+  .grid2,.grid3,.grid4{grid-template-columns:1fr!important}
+  .ph-title{font-size:32px}
+  .tabs{overflow-x:auto;flex-wrap:nowrap}
+  .tab{white-space:nowrap;font-size:10px;padding:9px 12px}
+  .ss-meta{grid-template-columns:1fr}
+  .card{padding:14px}
+  .ph{margin-bottom:18px}
+}
+.logo{padding:22px 20px 18px;border-bottom:1px solid #1a1a1a;flex-shrink:0}
+.logo-text{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--red);line-height:1}
+.logo-text span{color:#fff}
+.logo-sub{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:#333;margin-top:3px}
+nav{padding:14px 10px;flex:1}
+.nav-section{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:#2a2a2a;padding:10px 10px 4px;text-transform:uppercase}
+.nav-btn{
+  display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;
+  margin-bottom:2px;background:transparent;border:none;border-left:2px solid transparent;
+  color:var(--t3);font-family:'Outfit',sans-serif;font-size:13px;
+  cursor:pointer;text-align:left;transition:all .12s;border-radius:0 4px 4px 0;
+}
+.nav-btn:hover{background:rgba(255,60,60,.05);color:#666}
+.nav-btn.active{background:rgba(255,60,60,.1);border-left-color:var(--red);color:#fff}
+.nav-btn .ni{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+#sidebar-foot{padding:14px 16px;border-top:1px solid #1a1a1a;flex-shrink:0}
+.status-pill{display:flex;align-items:center;gap:7px;padding:7px 10px;background:var(--card);border:1px solid var(--bdr)}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ── MAIN ─────────────────────────────────────────── */
+#main{margin-left:230px;padding:32px 36px;max-width:1080px;min-height:100vh}
+.page{display:none}.page.active{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── PAGE HEADER ──────────────────────────────────── */
+.ph{margin-bottom:28px}
+.ph-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#333;margin-bottom:6px}
+.ph-title{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:2px;color:#fff;line-height:1}
+.ph-title span{color:var(--red)}
+.ph-sub{font-size:13px;color:var(--t3);margin-top:6px}
+
+/* ── CARDS ────────────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--bdr);padding:20px}
+.card-sm{padding:14px}
+.card-accent-red{border-top:2px solid rgba(255,60,60,.3)}
+.card-accent-cyan{border-top:2px solid rgba(0,229,255,.3)}
+.card-accent-green{border-top:2px solid rgba(0,230,118,.3)}
+.card-accent-purple{border-top:2px solid rgba(156,96,255,.3)}
+.card-accent-orange{border-top:2px solid rgba(255,140,0,.3)}
+
+/* ── FORMS ────────────────────────────────────────── */
+.lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:7px;display:block}
+.lbl-ok{color:var(--green)}
+.lbl-dim{color:#444}
+.inp{width:100%;background:var(--card2);border:1px solid var(--bdr);color:var(--t);padding:10px 14px;font-size:14px;outline:none;transition:border-color .12s}
+.inp:focus{border-color:var(--red)}
+.inp::placeholder{color:#333}
+textarea.inp{resize:vertical;min-height:80px}
+.sel{width:100%;background:var(--card2);border:1px solid var(--bdr);color:var(--t);padding:10px 14px;font-size:14px;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23444'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer}
+.field{margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+
+/* ── BUTTONS ──────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;transition:all .15s;outline:none}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover:not(:disabled){background:#e63030}
+.btn-full{width:100%;padding:14px}
+.btn-ghost{background:transparent;border:1px solid var(--bdr);color:var(--t3)}
+.btn-ghost:hover:not(:disabled){border-color:var(--bdr2);color:var(--t)}
+.btn-green{background:var(--green);color:#000;font-weight:700}
+.btn-cyan{background:var(--cyan);color:#000;font-weight:700}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-big{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;padding:16px}
+
+/* ── CHIPS ────────────────────────────────────────── */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{padding:5px 11px;background:var(--card2);border:1px solid var(--bdr);color:var(--t3);font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;transition:all .12s}
+.chip:hover{border-color:var(--bdr2);color:var(--t2)}
+.chip.on{background:var(--red);border-color:var(--red);color:#fff}
+
+/* ── STAT CARDS ───────────────────────────────────── */
+.stat-card{text-align:center;padding:16px 10px}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;margin-top:4px}
+.stat-lbl{font-family:'DM Mono',monospace;font-size:9px;color:#333;letter-spacing:2px;margin-top:5px}
+
+/* ── TAGS ─────────────────────────────────────────── */
+.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{font-family:'DM Mono',monospace;font-size:11px;padding:3px 8px;background:var(--card2);border:1px solid #222;color:#555}
+
+/* ── SCRIPT SECTION ───────────────────────────────── */
+.ss{border:1px solid var(--bdr);margin-bottom:10px;animation:fadeUp .3s ease}
+.ss-head{display:flex;align-items:center;gap:10px;padding:9px 14px;background:#0f0f0f;border-bottom:1px solid #1a1a1a}
+.ss-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;padding:2px 8px;border:1px solid}
+.ss-time{margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#333}
+.ss-body{padding:14px}
+.ss-text{font-size:14px;line-height:1.75;color:#ccc;margin-bottom:12px}
+.ss-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ss-meta-box{background:var(--card2);padding:10px 12px}
+.ss-meta-lbl{font-family:'DM Mono',monospace;font-size:9px;color:#444;letter-spacing:2px;margin-bottom:4px}
+.ss-meta-val{font-size:12px;color:var(--t2);line-height:1.4}
+
+/* ── TABS ─────────────────────────────────────────── */
+.tabs{display:flex;border-bottom:1px solid #1a1a1a;margin-bottom:20px}
+.tab{padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;margin-bottom:-1px}
+.tab.active{border-bottom-color:var(--red);color:#fff}
+
+/* ── PIPELINE STATUS ──────────────────────────────── */
+.pipe-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #111;animation:fadeUp .3s ease}
+.pipe-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pipe-title{font-size:13px;color:#ccc;flex:1}
+.pipe-score{font-family:'Bebas Neue',sans-serif;font-size:20px}
+.pipe-ts{font-family:'DM Mono',monospace;font-size:10px;color:#333}
+
+/* ── API KEY FIELD ────────────────────────────────── */
+.api-field{display:flex;background:var(--card2);border:1px solid var(--bdr);transition:border-color .15s}
+.api-field:focus-within{border-color:rgba(255,60,60,.5)}
+.api-field.ok{border-color:rgba(0,230,118,.3)}
+.api-field.err{border-color:rgba(255,60,60,.5)}
+.api-field input{flex:1;background:transparent;border:none;color:var(--t);padding:10px 14px;font:inherit;font-size:13px;outline:none}
+.api-field input::placeholder{color:#333}
+.api-field-btns{display:flex;align-items:center;border-left:1px solid var(--bdr)}
+.api-btn{padding:0 12px;height:100%;background:none;border:none;color:var(--t3);cursor:pointer;font:inherit;font-size:11px;letter-spacing:1px;font-weight:600;white-space:nowrap;transition:color .12s}
+.api-btn:hover{color:var(--t)}
+
+/* ── TREND CARD ───────────────────────────────────── */
+.trend-card{border:1px solid #1a1a1a;border-left:3px solid var(--red);padding:14px 16px;margin-bottom:8px;animation:fadeUp .3s ease}
+.trend-title{font-size:14px;color:#ddd;margin-bottom:5px;line-height:1.4}
+.trend-hook{font-size:12px;color:#555;font-style:italic;margin-bottom:8px}
+.trend-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.vbadge{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border:1px solid}
+
+/* ── HOOK CARD ────────────────────────────────────── */
+.hook-card{border:1px solid #1a1a1a;padding:14px 16px;margin-bottom:8px;border-left:3px solid var(--cyan)}
+.hook-text{font-size:14px;color:#eee;line-height:1.5;margin-bottom:8px}
+.hook-why{font-size:12px;color:#555;font-style:italic}
+
+/* ── IDEA CARD ────────────────────────────────────── */
+.idea-card{background:var(--card2);border:1px solid var(--bdr);padding:14px;margin-bottom:8px}
+.idea-title{font-size:14px;color:#ddd;font-weight:600;margin-bottom:4px}
+.idea-angle{font-size:12px;color:#666;margin-bottom:8px;font-style:italic}
+
+/* ── NICHE CARD ────────────────────────────────────── */
+.niche-card{border:1px solid #1a1a1a;padding:16px;margin-bottom:10px}
+.niche-name{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--red);margin-bottom:6px}
+.niche-score-bar{height:4px;background:#1a1a1a;margin:8px 0;overflow:hidden}
+.niche-score-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange))}
+
+/* ── CALENDAR ─────────────────────────────────────── */
+.cal-row{border:1px solid var(--bdr);padding:12px 16px;margin-bottom:6px}
+.cal-day{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--red);min-width:36px}
+.cal-topic{font-weight:600;font-size:13px;color:var(--t);margin-bottom:3px}
+.cal-hook{font-size:12px;color:#555;font-style:italic}
+.cal-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+
+/* ── SPINNER ──────────────────────────────────────── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+
+/* ── TOASTS ───────────────────────────────────────── */
+#toasts{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:7px;z-index:9999}
+.toast{padding:11px 15px;border:1px solid;font-size:13px;display:flex;align-items:center;gap:8px;max-width:320px;animation:fadeUp .2s ease}
+.toast-s{background:#0a1f0d;border-color:rgba(0,230,118,.3);color:var(--green)}
+.toast-e{background:#1f0a0a;border-color:rgba(255,60,60,.3);color:var(--red)}
+.toast-i{background:#0a121f;border-color:rgba(0,229,255,.3);color:var(--cyan)}
+.toast-w{background:#1f160a;border-color:rgba(255,140,0,.3);color:var(--orange)}
+
+/* ── MISC ─────────────────────────────────────────── */
+.sep{height:1px;background:var(--bdr);margin:20px 0}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}
+.flex{display:flex;align-items:center}.flex-between{display:flex;align-items:center;justify-content:space-between}
+.gap8{gap:8px}.gap12{gap:12px}.gap16{gap:16px}
+.w-full{width:100%}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;font-family:'DM Mono',monospace;font-size:10px;border:1px solid}
+.err-box{padding:10px 14px;background:rgba(255,60,60,.06);border:1px solid rgba(255,60,60,.2);color:var(--red);font-size:13px;margin-bottom:16px;font-family:'DM Mono',monospace}
+.info-box{padding:10px 14px;background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.15);color:var(--cyan);font-size:12px}
+.copy-btn{cursor:pointer;opacity:.5;transition:opacity .12s;font-size:12px;padding:2px 6px}
+.copy-btn:hover{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════ -->
+<!-- Mobile hamburger + overlay -->
+<div id="mob-overlay"></div>
+<button id="mob-toggle" aria-label="Menu">
+  <span></span><span></span><span></span>
+</button>
+
+<aside id="sidebar">
+  <div class="logo">
+    <div class="logo-text">BLACK<span>BOX</span> MAX</div>
+    <div class="logo-sub">AI VIDEO FACTORY v2.0</div>
+  </div>
+  <nav>
+    <button class="nav-btn active" data-page="home"><span class="ni">⚡</span> Početna</button>
+    <button class="nav-btn" data-page="batch"><span class="ni">📦</span> Batch Generator</button>
+
+    <div class="nav-section">Idea Lab</div>
+    <button class="nav-btn" data-page="ideas"><span class="ni">💡</span> Generator Ideja</button>
+    <button class="nav-btn" data-page="hooks"><span class="ni">⚡</span> Viral Hook Lab</button>
+    <button class="nav-btn" data-page="niche"><span class="ni">🎯</span> Niša Finder</button>
+
+    <div class="nav-section">Script Lab</div>
+    <button class="nav-btn" data-page="studio"><span class="ni">📝</span> Generator Skripti</button>
+    <button class="nav-btn" data-page="captions"><span class="ni">💬</span> Caption Lab</button>
+    <button class="nav-btn" data-page="hashtags"><span class="ni">#</span> Hashtag Engine</button>
+
+    <div class="nav-section">Growth Lab</div>
+    <button class="nav-btn" data-page="trends"><span class="ni">🔥</span> Trend Discovery</button>
+    <button class="nav-btn" data-page="calendar"><span class="ni">📅</span> Content Kalendar</button>
+    <button class="nav-btn" data-page="competitor"><span class="ni">👥</span> Competitor Analiza</button>
+    <button class="nav-btn" data-page="strategy"><span class="ni">🚀</span> Viral Strategija</button>
+
+    <div class="nav-section">Sistem</div>
+    <button class="nav-btn" data-page="analytics"><span class="ni">📊</span> Analytics</button>
+    <button class="nav-btn" data-page="pipeline"><span class="ni">🤖</span> Auto Pipeline</button>
+    <button class="nav-btn" data-page="settings"><span class="ni">⚙️</span> API Ključevi</button>
+  </nav>
+  <div id="sidebar-foot">
+    <div class="status-pill">
+      <div class="status-dot" id="status-dot" style="background:#333"></div>
+      <span id="status-txt" style="font-family:'DM Mono',monospace;font-size:10px;color:#333;letter-spacing:1px">PROVJERA...</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══════════════════════════════════════════ -->
+<main id="main">
+
+<!-- ════ HOME ════════════════════════════════════════ -->
+<div class="page active" id="p-home">
+  <div class="ph">
+    <div class="ph-label">DASHBOARD</div>
+    <h1 class="ph-title">BLACK<span>BOX</span> MAX</h1>
+    <div class="ph-sub">Autonomous AI short video factory — Groq AI · StreamElements TTS · FFmpeg</div>
+  </div>
+  <div class="grid4 mb16" id="home-stats">
+    <div class="card stat-card"><div style="font-size:22px">⚡</div><div class="stat-num" style="color:var(--red)">6+</div><div class="stat-lbl">AI ALATA</div></div>
+    <div class="card stat-card"><div style="font-size:22px">🎬</div><div class="stat-num" style="color:var(--green)" id="hs-total">0</div><div class="stat-lbl">VIDEA KREIRAN</div></div>
+    <div class="card stat-card"><div style="font-size:22px">📅</div><div class="stat-num" style="color:var(--cyan)" id="hs-today">0</div><div class="stat-lbl">DANAS</div></div>
+    <div class="card stat-card"><div style="font-size:22px">🏆</div><div class="stat-num" style="color:var(--orange)" id="hs-score">—</div><div class="stat-lbl">AVG SCORE</div></div>
+  </div>
+
+  <!-- Quick Run -->
+  <div class="card card-accent-red mb16">
+    <div class="flex-between mb12">
+      <div><label class="lbl">⚡ BRZI START — Auto Pipeline</label><div style="font-size:12px;color:#444">Pokreni pipeline odmah s custom nišom</div></div>
+      <span id="home-run-status" style="font-size:12px;color:var(--green)"></span>
+    </div>
+    <div class="grid2 mb12">
+      <div><label class="lbl lbl-dim">Niša</label>
+        <input class="inp" id="hr-niche" placeholder="AI Tools, Finance, Psychology...">
+        <div class="chips" id="hr-niche-chips"></div>
+      </div>
+      <div><label class="lbl lbl-dim">Topic (opcionalno)</label>
+        <input class="inp" id="hr-topic" placeholder="Specifična tema ili ostavi prazno">
+        <div class="field mt8">
+          <label class="lbl lbl-dim">Platform</label>
+          <select class="sel" id="hr-platform">
+            <option value="both">TikTok + YouTube Shorts</option>
+            <option value="youtube">YouTube Shorts</option>
+            <option value="tiktok">TikTok Only</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-red btn-full btn-big" onclick="quickRun()" id="btn-quickrun">
+      ▶ POKRENI PIPELINE
+    </button>
+  </div>
+
+  <!-- 10-Day Cash Mode -->
+  <div class="card card-accent-green mb16">
+    <div class="flex-between mb12">
+      <div><label class="lbl">💸 10-DAY CASH MODE (0 BUDGET)</label><div style="font-size:12px;color:#444">Automatski plan za brzu egzekuciju i prve leadove/prihod.</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="genCashPlan()" id="btn-cash-plan">GENERIŠI PLAN</button>
+    </div>
+    <div id="home-cash-plan" style="font-size:12px;color:#333;line-height:1.7">
+      Klikni <strong>GENERIŠI PLAN</strong> da dobiješ 10-dnevni plan objava + CTA strategiju.
+    </div>
+  </div>
+
+  <!-- Recent Videos -->
+  <div class="card">
+    <div class="flex-between mb12">
+      <label class="lbl">📼 NEDAVNI VIDEI</label>
+      <button class="btn btn-ghost btn-sm" onclick="loadHomeStats()">↻ Refresh</button>
+    </div>
+    <div id="home-log">
+      <div style="color:#2a2a2a;font-family:'DM Mono',monospace;font-size:12px;text-align:center;padding:30px 0">Još nema videa. Pokreni pipeline ili generiši skriptu.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ BATCH GENERATOR ═════════════════════════════ -->
+<div class="page" id="p-batch">
+  <div class="ph"><div class="ph-label">AUTOMATION</div><h1 class="ph-title">BATCH <span>GENERATOR</span></h1><div class="ph-sub">Generiši više videa odjednom</div></div>
+  <div class="card card-accent-red mb16">
+    <div class="grid2 mb16">
+      <div class="field"><label class="lbl">Niša</label><input class="inp" id="batch-niche" placeholder="AI Tools"><div class="chips" id="batch-niche-chips"></div></div>
+      <div>
+        <div class="field"><label class="lbl">Broj videa</label><select class="sel" id="batch-count"><option value="2">2 videa</option><option value="3" selected>3 videa</option><option value="5">5 videa</option><option value="10">10 videa</option></select></div>
+        <div class="field"><label class="lbl">Hook stil</label><select class="sel" id="batch-hook"><option value="contradiction">Contradiction</option><option value="secret">Hidden Secret</option><option value="mistake">Costly Mistake</option><option value="question">Bold Question</option><option value="statistic">Shocking Stat</option></select></div>
+      </div>
+    </div>
+    <button class="btn btn-red btn-full btn-big" onclick="runBatch()" id="btn-batch">▶ POKRENI BATCH</button>
+  </div>
+  <div id="batch-results"></div>
+</div>
+
+<!-- ════ GENERATOR IDEJA ══════════════════════════════ -->
+<div class="page" id="p-ideas">
+  <div class="ph"><div class="ph-label">IDEA LAB</div><h1 class="ph-title">GENERATOR <span>IDEJA</span></h1><div class="ph-sub">AI generiše viral ideje za tvoju nišu</div></div>
+  <div class="card card-accent-purple mb16">
+    <div class="grid2 mb16">
+      <div class="field"><label class="lbl">Niša</label><input class="inp" id="ideas-niche" placeholder="AI Tools, Finance..."><div class="chips" id="ideas-niche-chips"></div></div>
+      <div class="field"><label class="lbl">Broj ideja</label><select class="sel" id="ideas-count"><option value="5">5 ideja</option><option value="10" selected>10 ideja</option><option value="15">15 ideja</option></select></div>
+    </div>
+    <button class="btn btn-red btn-full" onclick="genIdeas()" id="btn-ideas">💡 GENERIŠI IDEJE</button>
+  </div>
+  <div id="ideas-result"></div>
+</div>
+
+<!-- ════ VIRAL HOOK LAB ════════════════════════════════ -->
+<div class="page" id="p-hooks">
+  <div class="ph"><div class="ph-label">IDEA LAB</div><h1 class="ph-title">VIRAL <span>HOOK LAB</span></h1><div class="ph-sub">10 viral hookova za bilo koji topic</div></div>
+  <div class="card card-accent-cyan mb16">
+    <div class="grid2 mb16">
+      <div class="field"><label class="lbl">Niša</label><input class="inp" id="hooks-niche" placeholder="AI Tools, Psychology..."></div>
+      <div class="field"><label class="lbl">Topic / Angle</label><input class="inp" id="hooks-topic" placeholder="ChatGPT money hack..."></div>
+    </div>
+    <div class="field"><label class="lbl">Stil hooka</label>
+      <div class="chips">
+        <div class="chip on" data-hstyle="mixed">Mixed</div>
+        <div class="chip" data-hstyle="contradiction">Contradiction</div>
+        <div class="chip" data-hstyle="secret">Secret</div>
+        <div class="chip" data-hstyle="question">Question</div>
+        <div class="chip" data-hstyle="statistic">Statistic</div>
+      </div>
+    </div>
+    <button class="btn btn-red btn-full" onclick="genHooks()" id="btn-hooks">⚡ GENERIŠI 10 HOOKOVA</button>
+  </div>
+  <div id="hooks-result"></div>
+</div>
+
+<!-- ════ NIŠA FINDER ══════════════════════════════════ -->
+<div class="page" id="p-niche">
+  <div class="ph"><div class="ph-label">IDEA LAB</div><h1 class="ph-title">NIŠA <span>FINDER</span></h1><div class="ph-sub">Pronađi najprofitniju nišu za tebe</div></div>
+  <div class="card card-accent-orange mb16">
+    <div class="grid2 mb16">
+      <div class="field"><label class="lbl">Tvoji interesi / keywords</label><input class="inp" id="niche-kw" placeholder="AI, money, psychology, health..."></div>
+      <div class="field"><label class="lbl">Cilj</label><input class="inp" id="niche-goal" placeholder="Passive income, followers, brand..."></div>
+    </div>
+    <button class="btn btn-red btn-full" onclick="findNiche()" id="btn-niche">🎯 PRONAĐI NIŠU</button>
+  </div>
+  <div id="niche-result"></div>
+</div>
+
+<!-- ════ GENERATOR SKRIPTI ════════════════════════════ -->
+<div class="page" id="p-studio">
+  <div class="ph"><div class="ph-label">SCRIPT LAB</div><h1 class="ph-title">GENERATOR <span>SKRIPTI</span></h1><div class="ph-sub">Kompletna 60-sekundna skripta s b-roll i overlay opisima</div></div>
+  <div class="card card-accent-red mb16">
+    <div class="grid2 mb16">
+      <div>
+        <div class="field"><label class="lbl">Niša</label><input class="inp" id="st-niche" placeholder="AI Tools, Finance..."><div class="chips" id="st-niche-chips"></div></div>
+      </div>
+      <div>
+        <div class="field"><label class="lbl">Topic / Angle</label><input class="inp" id="st-topic" placeholder="5 ChatGPT prompts that 10x your output"></div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">Hook Stil</label><select class="sel" id="st-hook"><option value="contradiction">Contradiction</option><option value="secret">Hidden Secret</option><option value="mistake">Costly Mistake</option><option value="question">Bold Question</option><option value="statistic">Shocking Stat</option></select></div>
+          <div class="field"><label class="lbl">Platform</label><select class="sel" id="st-platform"><option value="both">TikTok + YT Shorts</option><option value="youtube">YouTube Shorts</option><option value="tiktok">TikTok Only</option></select></div>
+        </div>
+      </div>
+    </div>
+    <div id="st-err"></div>
+    <button class="btn btn-red btn-full btn-big" onclick="genScript()" id="btn-st">⚡ GENERIŠI VIRAL SKRIPTU</button>
+  </div>
+  <!-- Script result -->
+  <div id="st-result" style="display:none">
+    <!-- Stats row -->
+    <div class="grid4 mb16" id="st-stats"></div>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="stTab('script',this)">SKRIPTA</button>
+      <button class="tab" onclick="stTab('meta',this)">SEO METADATA</button>
+      <button class="tab" onclick="stTab('pipeline',this)">PIPELINE</button>
+    </div>
+    <div id="st-tab-script"></div>
+    <div id="st-tab-meta" style="display:none"></div>
+    <div id="st-tab-pipeline" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ════ CAPTION LAB ══════════════════════════════════ -->
+<div class="page" id="p-captions">
+  <div class="ph"><div class="ph-label">SCRIPT LAB</div><h1 class="ph-title">CAPTION <span>LAB</span></h1><div class="ph-sub">5 platform-optimiziranih captiona po ideji</div></div>
+  <div class="card card-accent-green mb16">
+    <div class="grid2 mb16">
+      <div class="field"><label class="lbl">Topic</label><input class="inp" id="cap-topic" placeholder="ChatGPT money hack, dark psychology..."></div>
+      <div class="field"><label class="lbl">Niša</label><input class="inp" id="cap-niche" placeholder="AI Tools, Finance..."></div>
+    </div>
+    <div class="grid2 mb16">
+      <div class="field"><label class="lbl">Platform</label><select class="sel" id="cap-platform"><option value="both">TikTok + YouTube</option><option value="tiktok">TikTok</option><option value="youtube">YouTube Shorts</option></select></div>
+      <div class="field"><label class="lbl">Ton</label><select class="sel" id="cap-tone"><option value="engaging">Engaging</option><option value="educational">Educational</option><option value="urgent">Urgent</option><option value="casual">Casual</option><option value="professional">Professional</option></select></div>
+    </div>
+    <button class="btn btn-red btn-full" onclick="genCaptions()" id="btn-cap">💬 GENERIŠI CAPTIONE</button>
+  </div>
+  <div id="cap-result"></div>
+</div>
+
+<!-- ════ HASHTAG ENGINE ════════════════════════════════ -->
+<div class="page" id="p-hashtags">
+  <div class="ph"><div class="ph-label">SCRIPT LAB</div><h1 class="ph-title">HASHTAG <span>ENGINE</span></h1><div class="ph-sub">Optimizirani hashtagovi za max reach</div></div>
+  <div class="card card-accent-yellow mb16">
+    <div class="grid2 mb16">
+      <div class="field"><label class="lbl">Topic</label><input class="inp" id="ht-topic" placeholder="AI money, dark psychology..."></div>
+      <div class="field"><label class="lbl">Niša</label><input class="inp" id="ht-niche" placeholder="AI Tools, Finance..."></div>
+    </div>
+    <div class="field"><label class="lbl">Platform</label><select class="sel" id="ht-platform"><option value="both">TikTok + YouTube</option><option value="tiktok">TikTok</option><option value="youtube">YouTube Shorts</option></select></div>
+    <button class="btn btn-red btn-full mt12" onclick="genHashtags()" id="btn-ht"># GENERIŠI HASHTAGOVE</button>
+  </div>
+  <div id="ht-result"></div>
+</div>
+
+<!-- ════ TREND DISCOVERY ══════════════════════════════ -->
+<div class="page" id="p-trends">
+  <div class="ph"><div class="ph-label">GROWTH LAB</div><h1 class="ph-title">TREND <span>RADAR</span></h1><div class="ph-sub">Trending topics i viral angeli za tvoju nišu</div></div>
+  <div class="card card-accent-red mb16">
+    <div class="field"><label class="lbl">Odaberi nišu</label><div class="chips" id="tr-niche-chips"></div></div>
+    <input class="inp mb12" id="tr-niche" placeholder="ili upiši custom nišu...">
+    <button class="btn btn-red btn-full btn-big" onclick="scanTrends()" id="btn-trends">🔥 SKENIRAJ TRENDING TOPICE</button>
+  </div>
+  <div id="tr-result"></div>
+</div>
+
+<!-- ════ CONTENT KALENDAR ═════════════════════════════ -->
+<div class="page" id="p-calendar">
+  <div class="ph"><div class="ph-label">GROWTH LAB</div><h1 class="ph-title">CONTENT <span>KALENDAR</span></h1><div class="ph-sub">AI generiše plan objava za 7, 14 ili 30 dana</div></div>
+  <div class="card card-accent-orange mb16">
+    <div class="grid2 mb16">
+      <div class="field"><label class="lbl">Niša</label><input class="inp" id="cal-niche" placeholder="AI Tools, Finance..."><div class="chips" id="cal-niche-chips"></div></div>
+      <div>
+        <div class="field"><label class="lbl">Broj dana</label><select class="sel" id="cal-days"><option value="7">7 dana</option><option value="14">14 dana</option><option value="30" selected>30 dana</option></select></div>
+        <div class="field"><label class="lbl">Platform</label><select class="sel" id="cal-platform"><option value="both">TikTok + YouTube</option><option value="tiktok">TikTok</option><option value="youtube">YouTube Shorts</option></select></div>
+      </div>
+    </div>
+    <button class="btn btn-red btn-full btn-big" onclick="genCalendar()" id="btn-cal">📅 GENERIŠI KALENDAR</button>
+  </div>
+  <div id="cal-result"></div>
+</div>
+
+<!-- ════ COMPETITOR ANALIZA ════════════════════════════ -->
+<div class="page" id="p-competitor">
+  <div class="ph"><div class="ph-label">GROWTH LAB</div><h1 class="ph-title">COMPETITOR <span>ANALIZA</span></h1><div class="ph-sub">AI analizira strategiju konkurencije</div></div>
+  <div class="card card-accent-purple mb16">
+    <div class="grid2 mb16">
+      <div class="field"><label class="lbl">Ime / URL kanala</label><input class="inp" id="comp-channel" placeholder="@channelname ili youtube.com/..."></div>
+      <div class="field"><label class="lbl">Niša</label><input class="inp" id="comp-niche" placeholder="AI Tools, Finance..."></div>
+    </div>
+    <button class="btn btn-red btn-full" onclick="analyzeCompetitor()" id="btn-comp">👥 ANALIZIRAJ KONKURENCIJU</button>
+  </div>
+  <div id="comp-result"></div>
+</div>
+
+<!-- ════ VIRAL STRATEGIJA ══════════════════════════════ -->
+<div class="page" id="p-strategy">
+  <div class="ph"><div class="ph-label">GROWTH LAB</div><h1 class="ph-title">VIRAL <span>STRATEGIJA</span></h1><div class="ph-sub">90-dnevni plan rasta za tvoj kanal</div></div>
+  <div class="card card-accent-green mb16">
+    <div class="grid2 mb16">
+      <div class="field"><label class="lbl">Niša</label><input class="inp" id="str-niche" placeholder="AI Tools, Finance..."><div class="chips" id="str-niche-chips"></div></div>
+      <div>
+        <div class="field"><label class="lbl">Cilj rasta</label><input class="inp" id="str-goal" placeholder="10k followera, monetizacija..."></div>
+        <div class="field"><label class="lbl">Vremenski okvir</label><select class="sel" id="str-time"><option value="30 days">30 dana</option><option value="90 days" selected>90 dana</option><option value="6 months">6 mjeseci</option></select></div>
+      </div>
+    </div>
+    <button class="btn btn-red btn-full btn-big" onclick="genStrategy()" id="btn-str">🚀 KREIRAJ STRATEGIJU</button>
+  </div>
+  <div id="str-result"></div>
+</div>
+
+<!-- ════ ANALYTICS ════════════════════════════════════ -->
+<div class="page" id="p-analytics">
+  <div class="ph"><div class="ph-label">SISTEM</div><h1 class="ph-title">ANALYTICS <span>HUB</span></h1></div>
+  <div class="grid4 mb16" id="an-stats">
+    <div class="card stat-card"><div class="stat-num" style="color:var(--red)" id="an-total">0</div><div class="stat-lbl">UKUPNO VIDEA</div></div>
+    <div class="card stat-card"><div class="stat-num" style="color:var(--green)" id="an-today">0</div><div class="stat-lbl">DANAS</div></div>
+    <div class="card stat-card"><div class="stat-num" style="color:var(--cyan)" id="an-score">—</div><div class="stat-lbl">AVG SCORE</div></div>
+    <div class="card stat-card"><div class="stat-num" style="color:var(--orange)" id="an-niche">—</div><div class="stat-lbl">TOP NIŠA</div></div>
+  </div>
+  <div class="card">
+    <div class="flex-between mb12"><label class="lbl">📼 LOG GENERISANIH VIDEA</label><button class="btn btn-ghost btn-sm" onclick="loadAnalytics()">↻ Refresh</button></div>
+    <div id="an-log"><div style="color:#2a2a2a;font-family:'DM Mono',monospace;font-size:12px;text-align:center;padding:30px 0">Učitavam...</div></div>
+  </div>
+</div>
+
+<!-- ════ AUTO PIPELINE ════════════════════════════════ -->
+<div class="page" id="p-pipeline">
+  <div class="ph"><div class="ph-label">SISTEM</div><h1 class="ph-title">AUTO <span>PIPELINE</span></h1><div class="ph-sub">Autonomni engine — radi 24/7 prema rasporedu</div></div>
+  <div class="grid2 mb16">
+    <div class="card card-accent-green">
+      <label class="lbl">🤖 PIPELINE STATUS</label>
+      <div style="margin:12px 0">
+        <div class="flex gap8 mb8"><div class="status-dot" style="background:var(--green);box-shadow:0 0 8px var(--green)"></div><span style="font-size:13px;color:var(--green)">Server aktivan</span></div>
+        <div style="font-size:12px;color:#444;line-height:1.7">
+          ⏰ Cron: 06:00 + 19:00 (svaki dan)<br>
+          🎬 FFmpeg: lokalni render<br>
+          🔊 TTS: StreamElements (free)<br>
+          🤖 AI: Groq llama-3.3-70b (free)
+        </div>
+      </div>
+    </div>
+    <div class="card card-accent-red">
+      <label class="lbl">⚡ RUČNO POKRETANJE</label>
+      <div class="field mt8"><label class="lbl lbl-dim">Niša</label><input class="inp" id="pipe-niche" placeholder="AI Tools..."></div>
+      <div class="field"><label class="lbl lbl-dim">Topic</label><input class="inp" id="pipe-topic" placeholder="opcionalno"></div>
+      <div class="field"><label class="lbl lbl-dim">Broj videa</label><select class="sel" id="pipe-count"><option value="1">1 video</option><option value="2" selected>2 videa</option><option value="3">3 videa</option></select></div>
+      <button class="btn btn-red btn-full mt8" onclick="manualPipeline()" id="btn-pipe">▶ POKRENI SADA</button>
+    </div>
+  </div>
+  <div class="card">
+    <label class="lbl">📋 PIPELINE LOG</label>
+    <div id="pipe-log" style="margin-top:12px">
+      <div style="color:#2a2a2a;font-family:'DM Mono',monospace;font-size:12px;text-align:center;padding:20px 0">Pokreni pipeline da vidiš log</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ API KLJUČEVI (Settings) ══════════════════════ -->
+<div class="page" id="p-settings">
+  <div class="ph"><div class="ph-label">SISTEM</div><h1 class="ph-title">API <span>KLJUČEVI</span></h1><div class="ph-sub">Ključevi se čuvaju na serveru u config.json + lokalni cache za UI</div></div>
+
+  <!-- Status -->
+  <div class="card mb16" id="set-status-card">
+    <div class="flex gap12">
+      <div class="status-dot" id="set-status-dot" style="background:#333;width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:2px"></div>
+      <div>
+        <div id="set-status-msg" style="font-family:'DM Mono',monospace;font-size:12px;color:#444">Provjeram ključeve...</div>
+        <div style="font-size:12px;color:#333;margin-top:4px">Groq je JEDINI obavezni ključ. Ostalo je opcionalno.</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="testGroq()" id="btn-test-groq">TESTIRAJ GROQ</button>
+    </div>
+    <div id="set-test-result" style="margin-top:10px;display:none"></div>
+  </div>
+
+  <!-- Groq -->
+  <div class="card card-accent-red mb12">
+    <div class="flex-between mb12">
+      <div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red);letter-spacing:1px;margin-bottom:4px">🤖 GROQ AI — OBAVEZNO</div><div style="font-size:12px;color:#444">Besplatno: 30 req/min · 14,400/dan · Modeli: llama-3.3-70b, llama-3.1-8b</div></div>
+      <a href="https://console.groq.com" target="_blank" class="btn btn-ghost btn-sm">→ Registracija</a>
+    </div>
+    <label class="lbl lbl-dim">Groq API Key <span style="color:var(--red)">*</span></label>
+    <div class="api-field" id="af-groq"><input type="password" id="k-groq" placeholder="gsk_xxxx"><div class="api-field-btns"><button class="api-btn" onclick="toggleKey('k-groq')">👁</button></div></div>
+    <div style="font-size:11px;color:#333;margin-top:5px">console.groq.com → API Keys → Create New Key</div>
+  </div>
+
+  <!-- YouTube -->
+  <div class="card card-accent-cyan mb12">
+    <div class="flex-between mb12">
+      <div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--cyan);letter-spacing:1px;margin-bottom:4px">📺 YOUTUBE UPLOAD — opcionalno</div><div style="font-size:12px;color:#444">Za auto-upload videa. Google Cloud Console → YouTube Data API v3</div></div>
+      <a href="https://console.cloud.google.com" target="_blank" class="btn btn-ghost btn-sm">→ Cloud Console</a>
+    </div>
+    <div class="grid2 mb8">
+      <div><label class="lbl lbl-dim">Client ID</label><div class="api-field" id="af-ytcid"><input type="password" id="k-ytcid" placeholder="xxxx.apps.googleusercontent.com"><div class="api-field-btns"><button class="api-btn" onclick="toggleKey('k-ytcid')">👁</button></div></div></div>
+      <div><label class="lbl lbl-dim">Client Secret</label><div class="api-field" id="af-ytcs"><input type="password" id="k-ytcs" placeholder="GOCSPX-xxxxxx"><div class="api-field-btns"><button class="api-btn" onclick="toggleKey('k-ytcs')">👁</button></div></div></div>
+    </div>
+    <label class="lbl lbl-dim">Access Token</label>
+    <div class="api-field" id="af-yttoken"><input type="password" id="k-yttoken" placeholder="ya29.xxxx (generiše se OAuth flowom)"><div class="api-field-btns"><button class="api-btn" onclick="toggleKey('k-yttoken')">👁</button></div></div>
+  </div>
+
+  <!-- TikTok -->
+  <div class="card card-accent-purple mb12">
+    <div class="flex-between mb12">
+      <div><div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--purple);letter-spacing:1px;margin-bottom:4px">📱 TIKTOK UPLOAD — opcionalno</div><div style="font-size:12px;color:#444">TikTok for Developers → Content Posting API</div></div>
+      <a href="https://developers.tiktok.com" target="_blank" class="btn btn-ghost btn-sm">→ Developers</a>
+    </div>
+    <div class="grid2">
+      <div><label class="lbl lbl-dim">Client Key</label><div class="api-field"><input type="password" id="k-ttck" placeholder="xxxxxxxxxx"><div class="api-field-btns"><button class="api-btn" onclick="toggleKey('k-ttck')">👁</button></div></div></div>
+      <div><label class="lbl lbl-dim">Access Token</label><div class="api-field"><input type="password" id="k-ttat" placeholder="att.xxxxxxxxxx"><div class="api-field-btns"><button class="api-btn" onclick="toggleKey('k-ttat')">👁</button></div></div></div>
+    </div>
+  </div>
+
+  <!-- Pipeline Config -->
+  <div class="card card-accent-orange mb12">
+    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--orange);letter-spacing:1px;margin-bottom:14px">⚙️ PIPELINE CONFIG</div>
+    <div class="grid2">
+      <div class="field"><label class="lbl lbl-dim">Default Niša</label><input class="inp" id="k-niche" placeholder="AI Tools"></div>
+      <div class="field"><label class="lbl lbl-dim">Videos Per Day</label><input class="inp" id="k-count" placeholder="3" type="number" min="1" max="10"></div>
+      <div class="field"><label class="lbl lbl-dim">Default Platform</label><select class="sel" id="k-platform"><option value="both">TikTok + YouTube Shorts</option><option value="youtube">YouTube Shorts</option><option value="tiktok">TikTok Only</option></select></div>
+      <div class="field"><label class="lbl lbl-dim">Promo Link</label><input class="inp" id="k-promo" placeholder="https://yourlink.com"></div>
+      <div class="field"><label class="lbl lbl-dim">Min Script Score (1-10)</label><input class="inp" id="k-min-score" placeholder="6" type="number" min="1" max="10"></div>
+      <div class="field"><label class="lbl lbl-dim">Max Script Attempts</label><input class="inp" id="k-max-script-attempts" placeholder="2" type="number" min="1" max="6"></div>
+    </div>
+  </div>
+
+  <!-- Autonomous Upload -->
+  <div class="card card-accent-cyan mb12">
+    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--cyan);letter-spacing:1px;margin-bottom:14px">🚀 AUTONOMNI UPLOAD ENGINE</div>
+    <div class="grid2">
+      <div class="field">
+        <label class="lbl lbl-dim">Auto Upload</label>
+        <select class="sel" id="k-auto-upload">
+          <option value="true">Uključen</option>
+          <option value="false">Isključen</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl lbl-dim">Upload Mode</label>
+        <select class="sel" id="k-upload-mode">
+          <option value="hybrid">Hybrid (local + webhook)</option>
+          <option value="webhook">Webhook only</option>
+          <option value="local">Local publish only</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl lbl-dim">Webhook URL</label>
+        <input class="inp" id="k-upload-webhook-url" placeholder="https://n8n.yourdomain/webhook/blackbox-upload">
+      </div>
+      <div class="field">
+        <label class="lbl lbl-dim">Webhook Token</label>
+        <div class="api-field">
+          <input type="password" id="k-upload-webhook-token" placeholder="Bearer token (optional)">
+          <div class="api-field-btns"><button class="api-btn" onclick="toggleKey('k-upload-webhook-token')">👁</button></div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl lbl-dim">Upload Timeout (ms)</label>
+        <input class="inp" id="k-upload-timeout-ms" placeholder="45000" type="number" min="5000" step="1000">
+      </div>
+      <div class="field">
+        <label class="lbl lbl-dim">Max Retry Attempts</label>
+        <input class="inp" id="k-upload-max-attempts" placeholder="5" type="number" min="1" max="20">
+      </div>
+    </div>
+    <div style="font-size:11px;color:#333;margin-top:8px">Za full auto upload poveži webhook (n8n/Make/Zapier) koji šalje video na YouTube/TikTok. Queue + retry radi automatski na serveru.</div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex gap12 mt16">
+    <button class="btn btn-red btn-big" style="flex:1" onclick="saveSettings()">💾 SAČUVAJ KLJUČEVE</button>
+    <button class="btn btn-ghost" onclick="clearSettings()">OBRIŠI SVE</button>
+  </div>
+
+  <!-- Security note -->
+  <div class="card mt16" style="border-left:3px solid #222">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:#333;letter-spacing:2px;margin-bottom:6px">🔒 SIGURNOST</div>
+    <div style="font-size:12px;color:#333;line-height:1.7">Ključevi i upload konfiguracija se čuvaju na <strong style="color:#444">serveru</strong> u <code>config.json</code> (za autonomni rad) i sinhronizuju u lokalni cache browsera radi brzog UI prikaza. Na tuđem računaru — klikni "Obriši sve".</div>
+  </div>
+
+  <!-- Quick start -->
+  <div class="card mt16 card-accent-red">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#444;letter-spacing:2px;margin-bottom:12px">BRZI START — 2 MINUTE</div>
+    <div style="display:flex;flex-direction:column;gap:0">
+      <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #111">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--red);min-width:32px">01</div>
+        <div><div style="font-size:13px;color:#888">Idi na <a href="https://console.groq.com" target="_blank" style="color:var(--red)">console.groq.com</a> → registracija (samo email)</div></div>
+      </div>
+      <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #111">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--orange);min-width:32px">02</div>
+        <div><div style="font-size:13px;color:#888">API Keys → Create New Key → kopiraj</div></div>
+      </div>
+      <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #111">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--cyan);min-width:32px">03</div>
+        <div><div style="font-size:13px;color:#888">Nalijepi gore u "Groq API Key" → Sačuvaj</div></div>
+      </div>
+      <div style="display:flex;gap:14px;padding:10px 0">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--green);min-width:32px">04</div>
+        <div><div style="font-size:13px;color:#888">Idi na Generator Skripti ili Početna → generiši!</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main><!-- /#main -->
+<div id="toasts"></div>
+
+<script>
+'use strict';
+
+// ══ CONSTANTS ══════════════════════════════════════════════════════
+const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
+const API        = window.location.origin;
+const STORAGE_KEY = 'bbmax_config';
+
+const NICHES = ['AI Tools','Financial Independence','Dark Psychology','Productivity','Crypto & Web3','True Crime','Health Hacks','Side Hustles','Stoicism','Motivation'];
+const SECTION_META = {
+  hook:   { label:'HOOK',      color:'#ff3c3c', time:'0–3s'  },
+  tip1:   { label:'TIP 01',    color:'#ff8c00', time:'3–20s' },
+  tip2:   { label:'TIP 02',    color:'#ff8c00', time:'20–35s'},
+  tip3:   { label:'TIP 03',    color:'#ff8c00', time:'35–50s'},
+  ending: { label:'LOOP HOOK', color:'#00e5ff', time:'50–60s'},
+};
+
+function hasGroqKey() {
+  return !!cfg.get('GROQ_API_KEY');
+}
+
+function localIdeas(niche, count) {
+  const c = normalizedCount(count, 3, 20, 8);
+  const types = ['educational','story','myth-busting','checklist','reaction'];
+  return Array.from({length:c}, (_,i)=>({
+    title: `${niche}: ideja #${i+1} koja privlači pažnju`,
+    angle: `Prikaži ${niche} kroz konkretan problem + brzo rješenje (${i+1}).`,
+    hook: `\"Ako radiš ${niche}, ova greška te košta pregleda.\"`,
+    whyViral: 'Jasna korist u prve 2 sekunde + konkretan takeaway + share potencijal.',
+    difficulty: i%3===0 ? 'easy' : i%3===1 ? 'medium' : 'hard',
+    estimatedViews: i%2===0 ? '10K-80K' : '50K-250K',
+    contentType: types[i % types.length],
+  }));
+}
+
+function localHooks(niche, topic, style, count=10) {
+  return Array.from({length:count}, (_,i)=>({
+    hook: `${topic}: ${i+1}. razlog zašto većina u ${niche} griješi odmah na početku`,
+    style: style || 'mixed',
+    viralScore: 7 + (i % 3),
+    whyItWorks: 'Otvara “knowledge gap”, pogađa bol i obećava brzu vrijednost.',
+  }));
+}
+
+function localCaptions(topic, niche, platform, tone) {
+  return Array.from({length:5}, (_,i)=>({
+    caption: `${topic} (${niche}) — praktičan ${tone||'engaging'} savjet #${i+1}. Sačuvaj za poslije i podijeli dalje.`,
+    platform: platform || 'both',
+    charCount: 130 + i * 12,
+    hashtags: ['viral','fyp', niche.replace(/\s+/g,'').toLowerCase(), 'tips', 'growth'].slice(0,5),
+    bestTime: i%2===0 ? '18:00' : '20:30',
+  }));
+}
+
+function localHashtags(topic, niche) {
+  const n = niche.replace(/\s+/g,'').toLowerCase();
+  const t = topic.replace(/\s+/g,'').toLowerCase();
+  return {
+    high_volume: ['viral','fyp','trending','motivation','mindset'],
+    mid_volume: [n, t, `${n}tips`, `${t}2026`, 'dailycontent'],
+    niche_specific: [`${n}community`, `${n}strategy`, `${n}growth`, `${n}hack`, `${n}daily`],
+    banned: [],
+    recommended: `#viral #fyp #${n} #${t} #${n}tips #dailycontent #${n}growth`,
+  };
+}
+
+function localCalendar(niche, days, platform) {
+  const d = normalizedCount(days, 3, 30, 7);
+  return Array.from({length:d}, (_,i)=>({
+    day: i+1,
+    date: `Day ${i+1}`,
+    topic: `${niche} fokus #${i+1}`,
+    hook: `3 sekunde koje odlučuju da li video ide viralno (#${i+1})`,
+    contentType: i%2===0 ? 'educational' : 'trending',
+    platform: platform || 'both',
+    bestTime: i%2===0 ? '18:00' : '20:00',
+    hashtags: [niche.replace(/\s+/g,'').toLowerCase(),'viral','fyp','tips'],
+  }));
+}
+
+// ══ CONFIG / STORAGE ════════════════════════════════════════════════
+const cfg = {
+  _cache: null,
+  load() {
+    if (this._cache) return this._cache;
+    try { this._cache = JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'); }
+    catch { this._cache = {}; }
+    return this._cache;
+  },
+  save(obj) {
+    this._cache = obj || {};
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this._cache));
+  },
+  get(k) { return this.load()[k] || ''; },
+  set(k,v) { const c={...this.load()}; c[k]=v; this.save(c); },
+  async syncFromServer() {
+    try {
+      const d = await fetch('/api/config').then(r => r.json());
+      this.save(d || {});
+    } catch (e) {
+      console.warn('[cfg.syncFromServer]', e.message);
+    }
+  },
+  async saveToServer() {
+    const c = this.load();
+    const res = await fetch('/api/config', {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(c),
+    });
+    if (!res.ok) throw new Error('Ne mogu sačuvati config na server.');
+  },
+};
+
+// ══ GROQ API ════════════════════════════════════════════════════════
+async function groq(prompt, { jsonMode=false, model='llama-3.3-70b-versatile', maxTokens=2000, temp=0.7 }={}) {
+  const key = cfg.get('GROQ_API_KEY');
+  if (!key) throw new Error('Groq API ključ nije postavljen! Idi u API Ključevi i dodaj ga (besplatno).');
+
+  const res = await fetch(GROQ_URL, {
+    method:'POST',
+    headers:{ 'Authorization': `Bearer ${key}`, 'Content-Type':'application/json' },
+    body: JSON.stringify({
+      model,
+      messages:[
+        ...(jsonMode ? [{ role:'system', content:'Respond with valid JSON only. No markdown, no preamble.' }] : []),
+        { role:'user', content:prompt }
+      ],
+      max_tokens: maxTokens,
+      temperature: temp,
+      ...(jsonMode && { response_format:{ type:'json_object' } }),
+    }),
+  });
+
+  if (!res.ok) {
+    const e = await res.json().catch(()=>({}));
+    if (res.status===401) throw new Error('Neispravan Groq API ključ! Provjeri u Postavkama.');
+    if (res.status===429) throw new Error('Groq rate limit dostignut. Pričekaj minutu i pokušaj ponovo.');
+    throw new Error((e.error && e.error.message) || `Groq greška ${res.status}`);
+  }
+
+  const d = await res.json();
+  const text = (((d.choices||[])[0]||{}).message||{}).content || '';
+
+  if (jsonMode) {
+    try { return JSON.parse(text.replace(/```json|```/g,'').trim()); }
+    catch { const m=text.match(/\{[\s\S]*\}/); if(m) return JSON.parse(m[0]); throw new Error('Invalid JSON od Groqa'); }
+  }
+  return text;
+}
+
+// ══ TOAST ════════════════════════════════════════════════════════════
+let tc=0;
+function toast(msg, type='i', dur=3200) {
+  const id='t'+(++tc);
+  const icons={s:'✓',e:'✗',i:'ℹ',w:'⚠'};
+  const el=document.createElement('div');
+  el.id=id; el.className=`toast toast-${type}`;
+  el.innerHTML=`<span>${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .25s'; setTimeout(()=>el.remove(),260); }, dur);
+}
+
+// ══ NAVIGATION ═══════════════════════════════════════════════════════
+function show(name) {
+  try {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    const page = document.getElementById('p-'+name);
+    if (page) page.classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b=>{
+      const pageName = b.getAttribute('data-page');
+      if (pageName === name) b.classList.add('active');
+    });
+
+    try {
+      if (name==='analytics') loadAnalytics();
+      if (name==='home') loadHomeStats();
+      if (name==='settings') loadSettingsPage();
+    } catch (err) {
+      console.error('Navigation side-effect failed:', err);
+      toast('Stranica otvorena, ali dio podataka nije učitan.','w');
+    }
+
+    try { localStorage.setItem('bbx:lastPage', name); } catch {}
+  } finally {
+    // Always close sidebar on mobile, even if page-specific loaders fail.
+    if (window.innerWidth <= MOBILE_BP) closeSidebar();
+  }
+}
+
+function bindNavigation() {
+  const mobToggle = document.getElementById('mob-toggle');
+  const mobOverlay = document.getElementById('mob-overlay');
+
+  if (mobToggle && !mobToggle.dataset.bound) {
+    mobToggle.dataset.bound = '1';
+    mobToggle.addEventListener('click', toggleSidebar);
+  }
+  if (mobOverlay && !mobOverlay.dataset.bound) {
+    mobOverlay.dataset.bound = '1';
+    mobOverlay.addEventListener('click', closeSidebar);
+  }
+
+  document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => {
+      const pageName = btn.getAttribute('data-page');
+      if (pageName) show(pageName);
+    });
+  });
+}
+
+const MOBILE_BP = 1024;
+
+function syncLayoutForViewport() {
+  if (window.innerWidth <= MOBILE_BP) {
+    closeSidebar();
+  }
+}
+
+function restoreLastPage() {
+  try {
+    const p = localStorage.getItem('bbx:lastPage');
+    if (p && document.getElementById('p-'+p)) show(p);
+  } catch {}
+}
+
+function toggleSidebar() {
+  const sb  = document.getElementById('sidebar');
+  const btn = document.getElementById('mob-toggle');
+  const ov  = document.getElementById('mob-overlay');
+  const open = sb.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  ov.classList.toggle('active', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('mob-toggle');
+  const overlay = document.getElementById('mob-overlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (toggle) toggle.classList.remove('open');
+  if (overlay) overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// ══ UI HELPERS ════════════════════════════════════════════════════════
+function setBtn(id, loading, txt) {
+  const b=document.getElementById(id); if(!b)return;
+  b.disabled=loading;
+  b.innerHTML=loading?`<span class="spin"></span> ${txt}`:txt;
+}
+function copyText(t) {
+  navigator.clipboard.writeText(t).then(()=>toast('Kopirano!','s')).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=t;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    toast('Kopirano!','s');
+  });
+}
+function el(id) { return document.getElementById(id); }
+function html(id, h) { const e=el(id); if(e) e.innerHTML=h; }
+function show_el(id) { const e=el(id); if(e) e.style.display='block'; }
+function hide_el(id) { const e=el(id); if(e) e.style.display='none'; }
+
+async function apiJson(url, options={}, timeoutMs=30000, retries=1) {
+  let attempt = 0;
+  while (attempt <= retries) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { ...options, signal: ctrl.signal });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const msg = (data && data.error) ? data.error : `HTTP ${res.status}`;
+        const retryable = res.status === 429 || res.status >= 500;
+        if (retryable && attempt < retries) {
+          await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
+          attempt++;
+          continue;
+        }
+        throw new Error(msg);
+      }
+      return data;
+    } catch (e) {
+      const retryableNetwork = (e && (e.name === 'AbortError' || /network/i.test(e.message || '')));
+      if (retryableNetwork && attempt < retries) {
+        await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
+        attempt++;
+        continue;
+      }
+      throw e;
+    } finally {
+      clearTimeout(t);
+    }
+  }
+}
+
+function normalizedCount(value, min, max, fallback) {
+  const n = parseInt(value, 10);
+  if (Number.isNaN(n)) return fallback;
+  if (n < min) return min;
+  if (n > max) return max;
+  return n;
+}
+
+function wireGlobalErrorGuards() {
+  window.addEventListener('error', (ev) => {
+    const msg = (ev && ev.error && ev.error.message) || 'Nepoznata JS greška';
+    console.error('[UI ERROR]', ev.error || ev.message || ev);
+    toast(`Greška: ${msg}`, 'e', 4500);
+  });
+  window.addEventListener('unhandledrejection', (ev) => {
+    const reason = ev && ev.reason;
+    const msg = (reason && reason.message) ? reason.message : String(reason || 'Nepoznat async error');
+    console.error('[UI PROMISE ERROR]', reason);
+    toast(`Async greška: ${msg}`, 'e', 4500);
+  });
+}
+
+// Build niche chips in multiple fields
+function buildNicheChips() {
+  const chipFields = ['hr-niche-chips','batch-niche-chips','ideas-niche-chips','st-niche-chips','tr-niche-chips','cal-niche-chips','str-niche-chips'];
+  const inputs = { 'hr-niche-chips':'hr-niche','batch-niche-chips':'batch-niche','ideas-niche-chips':'ideas-niche','st-niche-chips':'st-niche','tr-niche-chips':'tr-niche','cal-niche-chips':'cal-niche','str-niche-chips':'str-niche' };
+  chipFields.forEach(cid => {
+    const container = el(cid); if(!container) return;
+    const inputId = inputs[cid];
+    container.innerHTML = NICHES.map(n=>
+      `<div class="chip" onclick="setNiche('${inputId}','${cid}','${n}')">${n}</div>`
+    ).join('');
+  });
+
+  // Hook style chips
+  const hsc = document.getElementById('hooks-result-chips');
+  // handled separately
+
+  // Trend niche chips
+  const trc = el('tr-niche-chips');
+  if(trc) trc.innerHTML = NICHES.map(n=>
+    `<div class="chip" onclick="el('tr-niche').value='${n}';el('tr-niche-chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${n}</div>`
+  ).join('');
+}
+
+function setNiche(inputId, chipGroupId, niche) {
+  const inp = el(inputId); if(inp) inp.value = niche;
+  const grp = el(chipGroupId); if(!grp) return;
+  grp.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', c.textContent===niche));
+}
+
+// Hook style chips
+document.addEventListener('DOMContentLoaded', () => {
+  (async () => {
+    wireGlobalErrorGuards();
+    await cfg.syncFromServer();
+    bindNavigation();
+    syncLayoutForViewport();
+    window.addEventListener('resize', syncLayoutForViewport);
+    restoreLastPage();
+    window.addEventListener('offline', () => toast('Nema internet konekcije', 'w', 5000));
+    window.addEventListener('online', () => toast('Konekcija vraćena', 's', 3000));
+    document.querySelectorAll('[data-hstyle]').forEach(c=>{
+      c.addEventListener('click',()=>{
+        c.closest('.chips').querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+        c.classList.add('on');
+      });
+    });
+    buildNicheChips();
+    loadHomeStats();
+    genCashPlan();
+    checkGroqStatus();
+  })();
+});
+
+// ══ STATUS CHECK ══════════════════════════════════════════════════════
+function checkGroqStatus() {
+  const hasKey = !!cfg.get('GROQ_API_KEY');
+  const dot = el('status-dot');
+  const txt = el('status-txt');
+  if(dot && txt) {
+    dot.style.background = hasKey ? 'var(--green)' : 'var(--red)';
+    dot.style.boxShadow  = hasKey ? '0 0 8px var(--green)' : '0 0 8px var(--red)';
+    txt.textContent = hasKey ? 'GROQ AKTIVAN' : 'DODAJ GROQ KLJUČ →';
+    txt.style.color = hasKey ? 'var(--green)' : 'var(--red)';
+  }
+}
+
+// ══ HOME ══════════════════════════════════════════════════════════════
+async function loadHomeStats() {
+  try {
+    const [sum, log] = await Promise.all([
+      apiJson('/api/analytics/summary'),
+      apiJson('/api/analytics/log?n=5'),
+    ]);
+    el('hs-total').textContent = sum.total || 0;
+    el('hs-today').textContent = sum.today || 0;
+    el('hs-score').textContent = sum.avgScore || '—';
+
+    // Fill home-log
+    if (!log.length) {
+      html('home-log','<div style="color:#2a2a2a;font-family:\'DM Mono\',monospace;font-size:12px;text-align:center;padding:30px 0">Još nema videa. Pokreni pipeline ili generiši skriptu.</div>');
+    } else {
+      html('home-log', log.map(e=>pipeRow(e)).join(''));
+    }
+  } catch (e) {
+    console.error('[loadHomeStats]', e);
+  }
+}
+
+async function genCashPlan() {
+  const niche = (el('hr-niche') && el('hr-niche').value.trim()) || cfg.get('DEFAULT_NICHE') || 'AI Tools';
+  const platform = (el('hr-platform') && el('hr-platform').value) || cfg.get('DEFAULT_PLATFORM') || 'both';
+  const videosPerDay = normalizedCount(cfg.get('DAILY_COUNT') || 3, 1, 12, 3);
+  setBtn('btn-cash-plan', true, 'GENERIŠEM...');
+  try {
+    const plan = await apiJson('/api/monetization/cash-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ niche, platform, days: 10, videosPerDay })
+    });
+    const daysHtml = (plan.daily || []).map(d => `
+      <div class="pipe-row">
+        <div class="pipe-dot" style="background:${d.stage==='Monetize'?'var(--green)':d.stage==='Scale'?'var(--orange)':'var(--cyan)'}"></div>
+        <div style="flex:1">
+          <div class="pipe-title">Dan ${d.day} · ${d.stage}</div>
+          <div style="font-size:11px;color:#444">${(d.tasks||[]).slice(0,2).join(' · ')}</div>
+          <div style="font-size:11px;color:#666;margin-top:4px">Target: ${d.target}</div>
+        </div>
+      </div>
+    `).join('');
+
+    html('home-cash-plan', `
+      <div class="card card-accent-green" style="padding:12px">
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--green)">Plan: ${plan.days} dana · ${plan.videosPerDay}/dan · ${plan.totals.totalVideos} videa</div>
+        <div style="font-size:12px;color:#444;margin-top:6px">Lead cilj: ${plan.totals.minLeadsGoal}–${plan.totals.stretchLeadsGoal} · Offer: ${plan.offerType}</div>
+        <div style="margin-top:10px">${daysHtml}</div>
+      </div>
+    `);
+    toast('10-day cash plan spreman!','s');
+  } catch (e) {
+    html('home-cash-plan', `<div class="err-box">✗ ${e.message}</div>`);
+    toast(e.message, 'e');
+  } finally {
+    setBtn('btn-cash-plan', false, 'GENERIŠI PLAN');
+  }
+}
+
+function pipeRow(e) {
+  const score = e.score || 0;
+  const color = score>=7?'var(--green)':score>=5?'var(--orange)':'var(--red)';
+  return `<div class="pipe-row">
+    <div class="pipe-dot" style="background:${color}"></div>
+    <div class="pipe-title">${e.title||'—'} <span style="color:#333;font-size:11px">${e.niche||''}</span></div>
+    <div class="pipe-score" style="color:${color}">${score}</div>
+    <div class="pipe-ts">${e.ts ? new Date(e.ts).toLocaleTimeString() : '—'}</div>
+  </div>`;
+}
+
+async function quickRun() {
+  const niche    = el('hr-niche').value.trim() || 'AI Tools';
+  const topic    = el('hr-topic').value.trim() || undefined;
+  const platform = el('hr-platform').value;
+  setBtn('btn-quickrun',true,'POKRETANJE...');
+  el('home-run-status').textContent='';
+  try {
+    await apiJson('/api/pipeline/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({niche,topic,platform})});
+    toast('Pipeline pokrenut!','s');
+    el('home-run-status').textContent='✓ Pokrenuto';
+    el('home-run-status').style.color='var(--green)';
+  } catch(e){ toast(e.message,'e'); }
+  finally{ setBtn('btn-quickrun',false,'▶ POKRENI PIPELINE'); }
+}
+
+// ══ BATCH GENERATOR ═══════════════════════════════════════════════════
+async function runBatch() {
+  const niche = el('batch-niche').value.trim() || 'AI Tools';
+  const count = normalizedCount(el('batch-count').value, 1, 20, 5);
+  const hook  = el('batch-hook').value;
+  setBtn('btn-batch',true,`GENERIŠEM ${count} VIDEA...`);
+  html('batch-results','');
+  try {
+    await apiJson('/api/pipeline/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({niche,hookStyle:hook,count:parseInt(count)})});
+    html('batch-results',`<div class="card card-accent-green"><div style="color:var(--green);font-family:'DM Mono',monospace;font-size:13px">✓ Batch od ${count} videa pokrenuto za "${niche}".<br><br>Videa se generišu u pozadini. Provjeri Analytics za status.</div></div>`);
+    toast(`Batch ${count}x pokrenut!`,'s');
+  } catch(e){
+    html('batch-results',`<div class="err-box">✗ ${e.message}</div>`);
+  } finally { setBtn('btn-batch',false,'▶ POKRENI BATCH'); }
+}
+
+// ══ GENERATOR IDEJA ═══════════════════════════════════════════════════
+async function genIdeas() {
+  const niche = el('ideas-niche').value.trim();
+  const count = el('ideas-count').value;
+  if(!niche){ toast('Upiši nišu','w'); return; }
+  setBtn('btn-ideas',true,'Generišem ideje...');
+  html('ideas-result','');
+  try {
+    const ideas = hasGroqKey()
+      ? ((await groq(
+          `Content ideation expert. Generate ${count} unique video ideas for niche "${niche}".
+Return JSON: {"ideas":[{"title":"","angle":"","hook":"","whyViral":"","difficulty":"easy","estimatedViews":"50K-200K","contentType":"educational"}]}`,
+          { jsonMode:true, maxTokens:2000 }
+        )).ideas || [])
+      : localIdeas(niche, count);
+    if (!hasGroqKey()) toast('Demo mode: lokalne ideje (bez API ključa).', 'w');
+    const diffColor={easy:'var(--green)',medium:'var(--orange)',hard:'var(--red)'};
+    html('ideas-result', ideas.map((idea,i)=>`
+      <div class="idea-card">
+        <div class="flex-between mb8">
+          <div class="idea-title">${i+1}. ${idea.title}</div>
+          <div class="flex gap8">
+            <span class="pill" style="color:${diffColor[idea.difficulty]||'#555'};border-color:${diffColor[idea.difficulty]||'#333'}">${idea.difficulty||'medium'}</span>
+            <span style="color:var(--orange);font-family:'DM Mono',monospace;font-size:10px">${idea.estimatedViews||'—'}</span>
+          </div>
+        </div>
+        <div class="idea-angle">${idea.angle||''}</div>
+        <div style="font-size:12px;color:#ff3c3c;font-style:italic;margin-bottom:8px">"${idea.hook||''}"</div>
+        <div style="font-size:12px;color:#444;line-height:1.5">${idea.whyViral||''}</div>
+        <div class="flex gap8 mt8">
+          <button class="btn btn-ghost btn-sm" onclick="copyText('${(idea.title||'').replace(/'/g,"\\'")}')">📋 Kopiraj naslov</button>
+          <button class="btn btn-ghost btn-sm" onclick="el('st-niche').value='${niche}';el('st-topic').value='${(idea.title||'').replace(/'/g,"\\'")}';show('studio');toast('Topic učitan u Studio!','s')">→ Otvori u Studiu</button>
+        </div>
+      </div>
+    `).join(''));
+  } catch(e){
+    const ideas = localIdeas(niche, count);
+    toast(`AI fallback aktiviran: ${e.message}`, 'w', 4200);
+    const diffColor={easy:'var(--green)',medium:'var(--orange)',hard:'var(--red)'};
+    html('ideas-result', ideas.map((idea,i)=>`
+      <div class="idea-card">
+        <div class="flex-between mb8">
+          <div class="idea-title">${i+1}. ${idea.title}</div>
+          <div class="flex gap8">
+            <span class="pill" style="color:${diffColor[idea.difficulty]||'#555'};border-color:${diffColor[idea.difficulty]||'#333'}">${idea.difficulty||'medium'}</span>
+            <span style="color:var(--orange);font-family:'DM Mono',monospace;font-size:10px">${idea.estimatedViews||'—'}</span>
+          </div>
+        </div>
+        <div class="idea-angle">${idea.angle||''}</div>
+        <div style="font-size:12px;color:#ff3c3c;font-style:italic;margin-bottom:8px">"${idea.hook||''}"</div>
+      </div>
+    `).join(''));
+  }
+  finally { setBtn('btn-ideas',false,'💡 GENERIŠI IDEJE'); }
+}
+
+// ══ VIRAL HOOK LAB ════════════════════════════════════════════════════
+async function genHooks() {
+  const niche = el('hooks-niche').value.trim();
+  const topic = el('hooks-topic').value.trim();
+  const style = ((document.querySelector('[data-hstyle].on') && document.querySelector('[data-hstyle].on').dataset && document.querySelector('[data-hstyle].on').dataset.hstyle) || 'mixed');
+  if(!niche||!topic){ toast('Upiši nišu i topic','w'); return; }
+  setBtn('btn-hooks',true,'Generišem hookove...');
+  html('hooks-result','');
+  try {
+    const hooks = hasGroqKey()
+      ? ((await groq(
+          `Elite viral hook writer. Generate 10 hooks for niche "${niche}", topic "${topic}", style "${style}".
+Return JSON: {"hooks":[{"hook":"","style":"","viralScore":8,"whyItWorks":""}]}`,
+          { jsonMode:true, maxTokens:1500 }
+        )).hooks || [])
+      : localHooks(niche, topic, style, 10);
+    if (!hasGroqKey()) toast('Demo mode: lokalni hookovi (bez API ključa).', 'w');
+    html('hooks-result', `<div class="card"><label class="lbl">⚡ ${hooks.length} VIRAL HOOKOVA</label>${
+      hooks.map((h,i)=>`
+        <div class="hook-card">
+          <div class="flex-between mb6">
+            <span class="vbadge" style="color:var(--cyan);border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.06)">${h.style||style}</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:${h.viralScore>=8?'var(--green)':'var(--orange)'}">${h.viralScore||7}/10</span>
+          </div>
+          <div class="hook-text">${i+1}. "${h.hook}"</div>
+          <div class="hook-why">${h.whyItWorks||''}</div>
+          <button class="btn btn-ghost btn-sm mt8" onclick="copyText('${(h.hook||'').replace(/'/g,"\\'")}')">📋 Kopiraj</button>
+        </div>`).join('')
+    }</div>`);
+  } catch(e){
+    const hooks = localHooks(niche, topic, style, 10);
+    toast(`AI fallback aktiviran: ${e.message}`, 'w', 4200);
+    html('hooks-result', `<div class="card"><label class="lbl">⚡ ${hooks.length} VIRAL HOOKOVA</label>${
+      hooks.map((h,i)=>`<div class="hook-card"><div class="hook-text">${i+1}. "${h.hook}"</div></div>`).join('')
+    }</div>`);
+  }
+  finally { setBtn('btn-hooks',false,'⚡ GENERIŠI 10 HOOKOVA'); }
+}
+
+// ══ NIŠA FINDER ═══════════════════════════════════════════════════════
+async function findNiche() {
+  const kw   = el('niche-kw').value.trim();
+  const goal = el('niche-goal').value.trim();
+  if(!kw){ toast('Upiši interese/keywords','w'); return; }
+  setBtn('btn-niche',true,'Analiziram niše...');
+  html('niche-result','');
+  try {
+    const data = await groq(
+      `Niche research expert. Analyze and recommend niches. Keywords: "${kw}", Goals: "${goal||'passive income'}".
+Return JSON: {"recommendations":[{"niche":"","score":85,"competition":"medium","monetization":"high","difficulty":"beginner","whyPerfect":"","topChannels":["c1","c2"],"contentPillars":["p1","p2","p3"]}],"avoid":[],"verdict":""}`,
+      { jsonMode:true, maxTokens:2000 }
+    );
+    const recs = data.recommendations || [];
+    const compColor={low:'var(--green)',medium:'var(--orange)',high:'var(--red)'};
+    const diffColor={beginner:'var(--green)',intermediate:'var(--orange)',advanced:'var(--red)'};
+    html('niche-result', recs.map(r=>`
+      <div class="niche-card">
+        <div class="flex-between mb8">
+          <div class="niche-name">${r.niche}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--red)">${r.score}/100</div>
+        </div>
+        <div class="niche-score-bar"><div class="niche-score-fill" style="width:${r.score}%"></div></div>
+        <div class="flex gap8 mb8 mt8">
+          <span class="pill" style="color:${compColor[r.competition]||'#555'};border-color:${compColor[r.competition]||'#333'}">Konkurencija: ${r.competition}</span>
+          <span class="pill" style="color:var(--green);border-color:rgba(0,230,118,.3)">Monetizacija: ${r.monetization}</span>
+          <span class="pill" style="color:${diffColor[r.difficulty]||'#555'};border-color:${diffColor[r.difficulty]||'#333'}">${r.difficulty}</span>
+        </div>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:10px">${r.whyPerfect}</p>
+        <div style="font-size:12px;color:#444;margin-bottom:6px">Content pillars: ${(r.contentPillars||[]).join(' · ')}</div>
+        <button class="btn btn-ghost btn-sm" onclick="el('st-niche').value='${r.niche}';show('studio');toast('Niša učitana u Studio!','s')">→ Generiši za ovu nišu</button>
+      </div>`).join('') + (data.verdict?`<div class="info-box mt12">${data.verdict}</div>`:''));
+  } catch(e){ html('niche-result',`<div class="err-box">✗ ${e.message}</div>`); }
+  finally { setBtn('btn-niche',false,'🎯 PRONAĐI NIŠU'); }
+}
+
+// ══ SCRIPT GENERATOR (STUDIO) ══════════════════════════════════════════
+let currentScript = null;
+
+async function genScript() {
+  const niche    = el('st-niche').value.trim();
+  const topic    = el('st-topic').value.trim();
+  const hookStyle= el('st-hook').value;
+  const platform = el('st-platform').value;
+  const errEl    = el('st-err');
+  errEl.innerHTML = '';
+
+  if (!niche||!topic) { errEl.innerHTML='<div class="err-box">Niche i topic su obavezni.</div>'; return; }
+
+  setBtn('btn-st',true,'AI GENERIŠE SKRIPTU...');
+  hide_el('st-result');
+
+  try {
+    const hookMap = {
+      contradiction:'a bold contradiction that stops the scroll',
+      secret:"a secret nobody is talking about",
+      mistake:'a warning about a costly mistake',
+      question:'a bold rhetorical question',
+      statistic:'a shocking counterintuitive statistic'
+    };
+    const script = await groq(
+      `You are an elite viral content strategist for faceless ${platform} channels.
+Generate a complete 60-second script for niche: "${niche}", topic: "${topic}". Hook style: ${hookMap[hookStyle]}.
+Return this exact JSON:
+{"title":"catchy title","hook":{"text":"0-3s hook","overlay":"max 5 words","broll":"footage"},"tips":[{"title":"tip1 title","text":"3-20s script","overlay":"overlay","broll":"footage"},{"title":"tip2","text":"20-35s","overlay":"overlay","broll":"footage"},{"title":"tip3","text":"35-50s","overlay":"overlay","broll":"footage"}],"ending":{"text":"50-60s loop hook","overlay":"overlay","broll":"footage"},"hashtags":["t1","t2","t3","t4","t5","t6","t7","t8","t9","t10"],"description":"caption 150 chars","voiceTone":"delivery instructions","estimatedViews":"50K-500K","viralScore":85}`,
+      { jsonMode:true, maxTokens:2000 }
+    );
+
+    currentScript = script;
+    renderScript(script, niche, platform);
+    show_el('st-result');
+    toast('✓ Skripta generisana!','s');
+  } catch(e) {
+    errEl.innerHTML = `<div class="err-box">✗ ${e.message}</div>`;
+  } finally {
+    setBtn('btn-st',false,'⚡ GENERIŠI VIRAL SKRIPTU');
+  }
+}
+
+function renderScript(sc, niche, platform) {
+  // Stats
+  html('st-stats',[
+    {label:'Viral Score', val:`${sc.viralScore}/100`, color:'var(--red)'},
+    {label:'Est. Views',  val:sc.estimatedViews||'—', color:'var(--orange)'},
+    {label:'Duration',    val:'60s',                  color:'var(--cyan)'},
+    {label:'Platform',    val:(platform||'both').toUpperCase(), color:'var(--purple)'},
+  ].map(m=>`<div class="card stat-card"><div class="stat-num" style="color:${m.color}">${m.val}</div><div class="stat-lbl">${m.label}</div></div>`).join(''));
+
+  // Script tab
+  const sections = [
+    ['hook',   sc.hook  ],
+    ['tip1',   ((sc.tips||[])[0])],
+    ['tip2',   ((sc.tips||[])[1])],
+    ['tip3',   ((sc.tips||[])[2])],
+    ['ending', sc.ending],
+  ];
+  html('st-tab-script',
+    sections.filter(([,d])=>d).map(([k,d])=>renderSection(k,d)).join('') +
+    `<div class="card mt12">
+      <div class="tag-row">${(sc.hashtags||[]).map(h=>`<span class="tag" onclick="copyText('#${h}')" style="cursor:pointer">#${h}</span>`).join('')}</div>
+      <div style="margin-top:12px;padding:10px 12px;background:var(--card2);border-left:2px solid #444">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#333;letter-spacing:2px;margin-bottom:4px">VOICE TONE</div>
+        <div style="font-size:13px;color:#666">${sc.voiceTone||''}</div>
+      </div>
+      <div class="flex gap8 mt12">
+        <button class="btn btn-ghost btn-sm" onclick="copyScriptFull()">📋 Kopiraj cijelu skriptu</button>
+        <button class="btn btn-ghost btn-sm" onclick="stTab('meta',document.querySelectorAll('.tab')[1])">→ Generiši Metadata</button>
+      </div>
+    </div>`
+  );
+
+  // Pipeline tab
+  html('st-tab-pipeline',`
+    <div class="card card-accent-red">
+      <label class="lbl">🤖 POKRENI PIPELINE ZA OVU SKRIPTU</label>
+      <div style="font-size:13px;color:#444;margin:10px 0 14px">Pipeline će koristiti ovu skriptu: generiše voice, titlove, video (FFmpeg) i uploaduje.</div>
+      <button class="btn btn-red btn-full" onclick="runScriptPipeline('${(sc.title||'').replace(/'/g,"\\'")}','${niche||''}')">▶ POKRENI PIPELINE ZA OVU SKRIPTU</button>
+    </div>
+  `);
+}
+
+function renderSection(key, data) {
+  if(!data) return '';
+  const m = SECTION_META[key] || {label:key.toUpperCase(),color:'#555',time:''};
+  return `<div class="ss" style="border-left:3px solid ${m.color}">
+    <div class="ss-head">
+      <span class="ss-badge" style="color:${m.color};border-color:${m.color}40;background:${m.color}10">${m.label}</span>
+      ${data.title?`<span style="font-size:12px;color:#555">— ${data.title}</span>`:''}
+      <span class="ss-time">${m.time}</span>
+    </div>
+    <div class="ss-body">
+      <p class="ss-text">${data.text||''}</p>
+      <div class="ss-meta">
+        <div class="ss-meta-box" style="border-left:2px solid var(--purple)"><div class="ss-meta-lbl">📹 B-ROLL</div><div class="ss-meta-val">${data.broll||''}</div></div>
+        <div class="ss-meta-box" style="border-left:2px solid var(--green)"><div class="ss-meta-lbl">✏️ OVERLAY</div><div class="ss-meta-val">${data.overlay||''}</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+let currentMeta = null;
+async function genMetadata() {
+  if (!currentScript) return;
+  const niche    = el('st-niche').value.trim();
+  const topic    = el('st-topic').value.trim();
+  const platform = el('st-platform').value;
+  const metaEl   = el('st-tab-meta');
+  metaEl.innerHTML='<div style="text-align:center;padding:30px;color:#333;font-family:\'DM Mono\',monospace;font-size:12px"><span class="spin" style="border-top-color:var(--red)"></span> GENERIŠEM METADATA...</div>';
+  try {
+    const meta = await groq(
+      `SEO expert. Generate optimized metadata for ${platform} video. Niche: ${niche}. Topic: ${topic}. Excerpt: "${((currentScript.hook||{}).text)||''}".
+Return JSON: {"titles":{"primary":"","alt1":"","alt2":""},"description":{"youtube":"","tiktok":""},"hashtags":{"high_volume":[],"mid_volume":[],"niche":[]},"thumbnail":{"headline":"","subtext":"","colorScheme":"","style":""},"seo":{"primaryKeyword":"","bestPostTime":"","competitionLevel":""},"viralPotential":{"score":80,"reasoning":"","suggestions":[]}}`,
+      { jsonMode:true, maxTokens:1500 }
+    );
+    currentMeta = meta;
+    const allTags = [...(((meta.hashtags||{}).high_volume)||[]),...(((meta.hashtags||{}).mid_volume)||[]),...(((meta.hashtags||{}).niche)||[])];
+    metaEl.innerHTML=`
+      <div class="card card-accent-red mb12">
+        <label class="lbl">NASLOVI</label>
+        <div style="font-size:15px;color:#eee;padding:8px 12px;background:var(--card2);margin-bottom:6px;border-left:3px solid var(--red)">${((meta.titles||{}).primary)||''}</div>
+        <div style="font-size:13px;color:#666;padding:6px 10px;background:#0a0a0a;margin-bottom:4px">Alt: ${((meta.titles||{}).alt1)||''}</div>
+        <div style="font-size:13px;color:#666;padding:6px 10px;background:#0a0a0a">Alt: ${((meta.titles||{}).alt2)||''}</div>
+      </div>
+      <div class="grid2 mb12">
+        <div class="card"><label class="lbl">THUMBNAIL</label>
+          <div style="font-size:20px;font-weight:900;color:var(--red)">${((meta.thumbnail||{}).headline)||''}</div>
+          <div style="font-size:12px;color:#666;margin-top:4px">${((meta.thumbnail||{}).subtext)||''}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:#333;margin-top:6px">Style: ${((meta.thumbnail||{}).style)||''} · ${((meta.thumbnail||{}).colorScheme)||''}</div>
+        </div>
+        <div class="card"><label class="lbl">SEO</label>
+          <div style="font-size:13px;color:#888;line-height:1.7">KW: ${((meta.seo||{}).primaryKeyword)||''}<br>Best time: ${((meta.seo||{}).bestPostTime)||''}<br>Competition: ${((meta.seo||{}).competitionLevel)||''}</div>
+          <div style="font-size:20px;color:var(--red);font-family:'Bebas Neue',sans-serif;margin-top:6px">${((meta.viralPotential||{}).score)||0}/100</div>
+        </div>
+      </div>
+      <div class="card mb12"><label class="lbl">HASHTAGOVI</label>
+        <div class="tag-row">${allTags.map(h=>`<span class="tag" onclick="copyText('#${h}')" style="cursor:pointer">#${h}</span>`).join('')}</div>
+      </div>
+      <div class="card mb12"><label class="lbl">YOUTUBE DESCRIPTION</label>
+        <pre style="font-size:12px;color:#666;white-space:pre-wrap;line-height:1.6">${((meta.description||{}).youtube)||''}</pre>
+      </div>
+      <div class="card mb12"><label class="lbl">TIKTOK CAPTION</label>
+        <div style="font-size:13px;color:#888">${((meta.description||{}).tiktok)||''}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="copyText(JSON.stringify(currentMeta,null,2))">📋 Kopiraj sve kao JSON</button>
+    `;
+  } catch(e) { metaEl.innerHTML=`<div class="err-box">✗ ${e.message}</div>`; }
+}
+
+function stTab(name, btnEl) {
+  ['script','meta','pipeline'].forEach(n=>{
+    const t=el('st-tab-'+n); if(t) t.style.display=n===name?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(btnEl) btnEl.classList.add('active');
+  if(name==='meta' && !currentMeta) genMetadata();
+}
+
+function copyScriptFull() {
+  if(!currentScript) return;
+  const sc = currentScript;
+  const lines = [sc.title,'', ((sc.hook||{}).text)||'', ...(sc.tips||[]).map(t=>t.text), ((sc.ending||{}).text)||'','', sc.description||'', (sc.hashtags||[]).map(h=>'#'+h).join(' ')];
+  copyText(lines.join('\n'));
+}
+
+async function runScriptPipeline(title, niche) {
+  try {
+    await apiJson('/api/pipeline/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({niche,topic:title})});
+    toast('Pipeline pokrenut za ovu skriptu!','s');
+  } catch(e){ toast(e.message,'e'); }
+}
+
+// ══ CAPTION LAB ══════════════════════════════════════════════════════
+async function genCaptions() {
+  const topic    = el('cap-topic').value.trim();
+  const niche    = el('cap-niche').value.trim();
+  const platform = el('cap-platform').value;
+  const tone     = el('cap-tone').value;
+  if(!topic||!niche){ toast('Upiši topic i nišu','w'); return; }
+  setBtn('btn-cap',true,'Generišem captione...');
+  html('cap-result','');
+  try {
+    const caps = hasGroqKey()
+      ? ((await groq(
+          `Social media expert. Generate 5 platform-optimized captions for ${platform} about "${topic}" (${niche}), tone: ${tone}.
+Return JSON: {"captions":[{"caption":"","platform":"","charCount":0,"hashtags":[],"bestTime":"","emoji":""}]}`,
+          { jsonMode:true, maxTokens:1200 }
+        )).captions || [])
+      : localCaptions(topic, niche, platform, tone);
+    if (!hasGroqKey()) toast('Demo mode: lokalni captioni (bez API ključa).', 'w');
+    html('cap-result',`<div class="card"><label class="lbl">💬 ${caps.length} CAPTIONA</label>${
+      caps.map((c,i)=>`
+        <div style="border:1px solid var(--bdr);border-left:3px solid var(--green);padding:14px 16px;margin-bottom:8px">
+          <div class="flex-between mb8">
+            <span class="vbadge" style="color:var(--green);border-color:rgba(0,230,118,.3);background:rgba(0,230,118,.06)">${c.platform||platform}</span>
+            <div class="flex gap8">
+              <span style="font-family:'DM Mono',monospace;font-size:10px;color:#444">${c.charCount||((c.caption||'').length)||0} chars</span>
+              <span style="font-family:'DM Mono',monospace;font-size:10px;color:#444">⏰ ${c.bestTime||'—'}</span>
+            </div>
+          </div>
+          <div style="font-size:14px;color:#ccc;line-height:1.6;margin-bottom:8px">${c.caption||''}</div>
+          <div class="tag-row mb8">${(c.hashtags||[]).map(h=>`<span class="tag">#${h}</span>`).join('')}</div>
+          <button class="btn btn-ghost btn-sm" onclick="copyText('${(c.caption||'').replace(/'/g,"\\'")}\\n\\n${(c.hashtags||[]).map(h=>'#'+h).join(' ')}')">📋 Kopiraj</button>
+        </div>`).join('')
+    }</div>`);
+  } catch(e){
+    const caps = localCaptions(topic, niche, platform, tone);
+    toast(`AI fallback aktiviran: ${e.message}`, 'w', 4200);
+    html('cap-result',`<div class="card"><label class="lbl">💬 ${caps.length} CAPTIONA</label>${
+      caps.map((c,i)=>`<div class="idea-card"><div class="idea-title">${i+1}. ${c.caption}</div></div>`).join('')
+    }</div>`);
+  }
+  finally { setBtn('btn-cap',false,'💬 GENERIŠI CAPTIONE'); }
+}
+
+// ══ HASHTAG ENGINE ════════════════════════════════════════════════════
+async function genHashtags() {
+  const topic    = el('ht-topic').value.trim();
+  const niche    = el('ht-niche').value.trim();
+  const platform = el('ht-platform').value;
+  if(!topic||!niche){ toast('Upiši topic i nišu','w'); return; }
+  setBtn('btn-ht',true,'Generiše hashtagove...');
+  html('ht-result','');
+  try {
+    const data = hasGroqKey()
+      ? await groq(
+          `Hashtag strategist. Generate optimized hashtags for ${platform}: topic "${topic}", niche "${niche}".
+Return JSON: {"high_volume":[],"mid_volume":[],"niche_specific":[],"banned":[],"recommended":"ready-to-paste set of 20"}`,
+          { jsonMode:true, maxTokens:800 }
+        )
+      : localHashtags(topic, niche);
+    if (!hasGroqKey()) toast('Demo mode: lokalni hashtagovi (bez API ključa).', 'w');
+    html('ht-result',`
+      <div class="card">
+        <div class="flex-between mb12"><label class="lbl"># HASHTAGOVI — ${platform.toUpperCase()}</label><button class="btn btn-ghost btn-sm" onclick="copyText(el('ht-copy-all').textContent)">📋 Kopiraj sve</button></div>
+        <div id="ht-copy-all" style="display:none">${data.recommended||''}</div>
+        ${[['🔥 High Volume', data.high_volume,'var(--red)'],['📊 Mid Volume', data.mid_volume,'var(--orange)'],['🎯 Niche Specific', data.niche_specific,'var(--cyan)']].map(([lbl,tags,color])=>`
+          <div style="margin-bottom:16px">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:${color};letter-spacing:2px;margin-bottom:8px">${lbl}</div>
+            <div class="tag-row">${(tags||[]).map(t=>`<span class="tag" onclick="copyText('#${t}')" style="cursor:pointer;border-color:${color}30;color:${color}">#${t}</span>`).join('')}</div>
+          </div>`).join('')}
+        ${((data.banned||[]).length)?`<div class="err-box mt8">❌ Izbjegaj: ${data.banned.map(t=>'#'+t).join(' ')}</div>`:''}
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:#555;padding:10px 12px;background:var(--card2);margin-top:12px;line-height:1.8">${data.recommended||''}</div>
+      </div>`);
+  } catch(e){
+    const data = localHashtags(topic, niche);
+    toast(`AI fallback aktiviran: ${e.message}`, 'w', 4200);
+    html('ht-result',`<div class="card"><div class="tag-row">${(data.high_volume||[]).map(t=>`<span class="tag">#${t}</span>`).join('')}</div></div>`);
+  }
+  finally { setBtn('btn-ht',false,'# GENERIŠI HASHTAGOVE'); }
+}
+
+// ══ TREND DISCOVERY ═══════════════════════════════════════════════════
+async function scanTrends() {
+  const niche = el('tr-niche').value.trim();
+  if(!niche){ toast('Odaberi ili upiši nišu','w'); return; }
+  setBtn('btn-trends',true,'SKENIRAM TRENDING...');
+  html('tr-result','');
+  try {
+    const data = await groq(
+      `Viral content trend analyst. Generate 8 trending angles for niche: "${niche}".
+Return JSON: {"trends":[{"topic":"","angle":"","viralReason":"","searchVolume":"high","competition":"low","estimatedViews":"50K-500K","hookIdea":"","difficulty":4}],"hotNow":["t1","t2","t3"],"nextWeek":["t1","t2"],"avoid":["o1","o2"]}`,
+      { jsonMode:true, maxTokens:2000 }
+    );
+    const trends = Array.isArray(data) ? data : (data.trends||[]);
+    const volColor={high:'var(--green)',medium:'var(--orange)',low:'#444'};
+    const compColor={low:'var(--green)',medium:'var(--orange)',high:'var(--red)'};
+    html('tr-result',`
+      <div class="grid2" style="gap:20px">
+        <div>
+          <div class="card mb12"><label class="lbl">🔥 TRENDING NOW — ${niche}</label>
+            ${trends.map(t=>`
+              <div class="trend-card">
+                <div class="trend-title">${t.topic}</div>
+                <div class="trend-hook">"${t.hookIdea||''}"</div>
+                <div class="trend-meta">
+                  <span class="vbadge" style="color:${volColor[t.searchVolume]||'#555'};border-color:${volColor[t.searchVolume]||'#333'}40;background:${volColor[t.searchVolume]||'#333'}10">VOL: ${(t.searchVolume||'').toUpperCase()}</span>
+                  <span class="vbadge" style="color:${compColor[t.competition]||'#555'};border-color:${compColor[t.competition]||'#333'}40;background:${compColor[t.competition]||'#333'}10">COMP: ${(t.competition||'').toUpperCase()}</span>
+                  <span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:var(--orange)">${t.estimatedViews||''}</span>
+                  <button class="btn btn-ghost btn-sm" onclick="el('st-niche').value='${niche}';el('st-topic').value='${(t.topic||'').replace(/'/g,"\\'")}';show('studio');toast('Topic učitan!','s')">→ Studio</button>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div>
+          ${((data.hotNow||[]).length)?`<div class="card mb12"><label class="lbl">⚡ HOTTEST RIGHT NOW</label>${data.hotNow.map((t,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #111"><span style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--red);width:24px">#${i+1}</span><span style="font-size:13px;color:#aaa;flex:1">${t}</span></div>`).join('')}</div>`:''}
+          ${((data.avoid||[]).length)?`<div class="card mb12"><label class="lbl" style="color:#555">❌ IZBJEGAJ</label>${data.avoid.map(t=>`<div style="padding:7px 10px;background:rgba(255,60,60,.04);font-size:12px;color:#444;margin-bottom:4px">${t}</div>`).join('')}</div>`:''}
+          ${((data.nextWeek||[]).length)?`<div class="card"><label class="lbl" style="color:var(--orange)">📅 PRIPREMI ZA NAREDNU SEDMICU</label>${data.nextWeek.map(t=>`<div style="padding:7px 10px;background:var(--card2);font-size:12px;color:#666;margin-bottom:4px;border-left:2px solid var(--orange)">${t}</div>`).join('')}</div>`:''}
+        </div>
+      </div>`);
+  } catch(e){ html('tr-result',`<div class="err-box">✗ ${e.message}</div>`); }
+  finally { setBtn('btn-trends',false,'🔥 SKENIRAJ TRENDING TOPICE'); }
+}
+
+// ══ CONTENT KALENDAR ══════════════════════════════════════════════════
+async function genCalendar() {
+  const niche    = el('cal-niche').value.trim();
+  const days     = el('cal-days').value;
+  const platform = el('cal-platform').value;
+  if(!niche){ toast('Upiši nišu','w'); return; }
+  setBtn('btn-cal',true,`GENERIŠE ${days}-DNEVNI PLAN...`);
+  html('cal-result','');
+  try {
+    const cal = hasGroqKey()
+      ? ((await groq(
+          `Content calendar expert. Generate ${days}-day calendar for "${niche}" on ${platform}.
+Return JSON: {"calendar":[{"day":1,"date":"Mon","topic":"","hook":"","contentType":"educational","platform":"","bestTime":"6PM","hashtags":[]}]}`,
+          { jsonMode:true, maxTokens:3000 }
+        )).calendar || [])
+      : localCalendar(niche, days, platform);
+    if (!hasGroqKey()) toast('Demo mode: lokalni kalendar (bez API ključa).', 'w');
+    const ctColor={educational:'var(--cyan)',entertaining:'var(--purple)',promotional:'var(--orange)',motivational:'var(--green)',trending:'var(--red)'};
+    html('cal-result',`
+      <div class="card mb12">
+        <div class="flex-between mb12"><label class="lbl">📅 ${days}-DNEVNI CONTENT PLAN — ${niche}</label>
+          <button class="btn btn-ghost btn-sm" onclick="downloadCalendar(${JSON.stringify(cal).replace(/"/g,'&quot;')})">⬇ CSV Export</button>
+        </div>
+        ${cal.map(d=>`
+          <div class="cal-row">
+            <div class="flex gap12">
+              <div class="cal-day">D${d.day}</div>
+              <div style="flex:1">
+                <div class="cal-topic">${d.topic||''}</div>
+                <div class="cal-hook">"${d.hook||''}"</div>
+                <div class="cal-meta">
+                  <span class="pill" style="color:${ctColor[d.contentType]||'#555'};border-color:${ctColor[d.contentType]||'#333'}40">${d.contentType||''}</span>
+                  <span style="font-family:'DM Mono',monospace;font-size:10px;color:#444">⏰ ${d.bestTime||''}</span>
+                  <span style="font-family:'DM Mono',monospace;font-size:10px;color:#444">📱 ${d.platform||platform}</span>
+                </div>
+                <div class="tag-row mt8">${(d.hashtags||[]).slice(0,5).map(h=>`<span class="tag">#${h}</span>`).join('')}</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="el('st-niche').value='${niche}';el('st-topic').value='${(d.topic||'').replace(/'/g,"\\'")}';show('studio');toast('Dan ${d.day} učitan!','s')" style="flex-shrink:0">→</button>
+            </div>
+          </div>`).join('')}
+      </div>`);
+  } catch(e){
+    const cal = localCalendar(niche, days, platform);
+    toast(`AI fallback aktiviran: ${e.message}`, 'w', 4200);
+    html('cal-result',`<div class="card">${cal.map(d=>`<div class="cal-row"><div class="cal-topic">${d.topic}</div></div>`).join('')}</div>`);
+  }
+  finally { setBtn('btn-cal',false,'📅 GENERIŠI KALENDAR'); }
+}
+
+function downloadCalendar(calData) {
+  try {
+    const cal = typeof calData==='string' ? JSON.parse(calData) : calData;
+    const headers = ['Dan','Datum','Topic','Hook','ContentType','Platform','BestTime','Hashtags'];
+    const rows = cal.map(d=>[d.day,d.date||'',`"${(d.topic||'').replace(/"/g,'""')}"`,`"${(d.hook||'').replace(/"/g,'""')}"`,d.contentType||'',d.platform||'',d.bestTime||'',`"${(d.hashtags||[]).map(h=>'#'+h).join(' ')}"`]);
+    const csv = [headers.join(','),...rows.map(r=>r.join(','))].join('\n');
+    const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='content-calendar.csv'; a.click();
+    toast('CSV preuzet!','s');
+  } catch(e){ toast('Export greška','e'); }
+}
+
+// ══ COMPETITOR ANALIZA ════════════════════════════════════════════════
+async function analyzeCompetitor() {
+  const channel = el('comp-channel').value.trim();
+  const niche   = el('comp-niche').value.trim();
+  if(!channel||!niche){ toast('Upiši kanal i nišu','w'); return; }
+  setBtn('btn-comp',true,'Analiziram konkurenciju...');
+  html('comp-result','');
+  try {
+    const data = await groq(
+      `Competitor analysis expert. Analyze content strategy for channel "${channel}" in niche "${niche}".
+Return JSON: {"strengths":[],"weaknesses":[],"contentStrategy":"","postingFrequency":"","topFormats":[],"gapsToExploit":[],"viralFormula":"","recommendation":""}`,
+      { jsonMode:true, maxTokens:1500 }
+    );
+    html('comp-result',`
+      <div class="grid2 mb12">
+        <div class="card card-accent-green"><label class="lbl">✅ PREDNOSTI</label>${(data.strengths||[]).map(s=>`<div style="padding:6px 10px;background:rgba(0,230,118,.04);font-size:12px;color:#888;margin-bottom:4px;border-left:2px solid rgba(0,230,118,.2)">${s}</div>`).join('')}</div>
+        <div class="card card-accent-red"><label class="lbl">❌ SLABOSTI</label>${(data.weaknesses||[]).map(s=>`<div style="padding:6px 10px;background:rgba(255,60,60,.04);font-size:12px;color:#888;margin-bottom:4px;border-left:2px solid rgba(255,60,60,.2)">${s}</div>`).join('')}</div>
+      </div>
+      <div class="card mb12 card-accent-cyan"><label class="lbl">📹 CONTENT STRATEGIJA</label><p style="font-size:13px;color:#888;line-height:1.7;margin-top:8px">${data.contentStrategy||''}</p><div style="margin-top:10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--cyan)">Posting: ${data.postingFrequency||'—'}</div></div>
+      <div class="card mb12"><label class="lbl">🎯 PRILIKE ZA EXPLOITATION</label>${(data.gapsToExploit||[]).map(g=>`<div style="padding:8px 12px;background:var(--card2);font-size:12px;color:#888;margin-bottom:6px;border-left:2px solid var(--orange)">${g}</div>`).join('')}</div>
+      <div class="card card-accent-green"><label class="lbl">💡 VIRALNA FORMULA</label><p style="font-size:13px;color:#aaa;line-height:1.6;margin:8px 0">${data.viralFormula||''}</p><div style="margin-top:10px;padding:10px 12px;background:var(--card2);font-size:13px;color:var(--green)">${data.recommendation||''}</div></div>`);
+  } catch(e){ html('comp-result',`<div class="err-box">✗ ${e.message}</div>`); }
+  finally { setBtn('btn-comp',false,'👥 ANALIZIRAJ KONKURENCIJU'); }
+}
+
+// ══ VIRAL STRATEGIJA ══════════════════════════════════════════════════
+async function genStrategy() {
+  const niche = el('str-niche').value.trim();
+  const goal  = el('str-goal').value.trim();
+  const time  = el('str-time').value;
+  if(!niche){ toast('Upiši nišu','w'); return; }
+  setBtn('btn-str',true,'Kreiram strategiju...');
+  html('str-result','');
+  try {
+    const data = await groq(
+      `Viral growth strategist. Create ${time} strategy for "${niche}" channel. Goal: ${goal||'grow audience'}.
+Return JSON: {"overview":"","phase1":{"focus":"","actions":[],"kpis":[]},"phase2":{"focus":"","actions":[],"kpis":[]},"phase3":{"focus":"","actions":[],"kpis":[]},"contentPillars":[],"postingSchedule":"","monetizationPath":"","tools":[],"successMetrics":[]}`,
+      { jsonMode:true, maxTokens:2000 }
+    );
+    const phaseColor=['var(--red)','var(--orange)','var(--green)'];
+    html('str-result',`
+      <div class="card card-accent-red mb12"><label class="lbl">🎯 OVERVIEW</label><p style="font-size:14px;color:#aaa;line-height:1.7;margin-top:8px;padding:12px 14px;background:var(--card2);border-left:3px solid var(--red)">${data.overview||''}</p></div>
+      <div class="grid3 mb12">
+        ${[['FAZA 1',data.phase1],['FAZA 2',data.phase2],['FAZA 3',data.phase3]].map(([lbl,ph],i)=>ph?`
+          <div class="card" style="border-top:2px solid ${phaseColor[i]}">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:${phaseColor[i]};margin-bottom:8px">${lbl}</div>
+            <div style="font-size:12px;color:#888;font-weight:600;margin-bottom:8px">${ph.focus||''}</div>
+            ${(ph.actions||[]).map(a=>`<div style="font-size:12px;color:#555;padding:4px 0;border-bottom:1px solid #111">• ${a}</div>`).join('')}
+            ${(ph.kpis||[]).length?`<div style="margin-top:8px;font-family:'DM Mono',monospace;font-size:9px;color:#333;letter-spacing:2px">KPI: ${ph.kpis.join(' · ')}</div>`:''}
+          </div>` : '').join('')}
+      </div>
+      <div class="grid2 mb12">
+        <div class="card"><label class="lbl">📊 CONTENT PILLARS</label><div class="flex" style="flex-wrap:wrap;gap:6px;margin-top:8px">${(data.contentPillars||[]).map(p=>`<span class="chip on" style="cursor:default">${p}</span>`).join('')}</div></div>
+        <div class="card"><label class="lbl">💰 MONETIZACIJA</label><p style="font-size:13px;color:#888;line-height:1.6;margin-top:6px">${data.monetizationPath||''}</p></div>
+      </div>
+      <div class="card"><label class="lbl">✅ SUCCESS METRICS</label><div class="grid2 mt8">${(data.successMetrics||[]).map(m=>`<div style="padding:8px 12px;background:var(--card2);font-size:12px;color:#888">✓ ${m}</div>`).join('')}</div></div>`);
+  } catch(e){ html('str-result',`<div class="err-box">✗ ${e.message}</div>`); }
+  finally { setBtn('btn-str',false,'🚀 KREIRAJ STRATEGIJU'); }
+}
+
+// ══ ANALYTICS ════════════════════════════════════════════════════════
+async function loadAnalytics() {
+  try {
+    const [sum, log] = await Promise.all([
+      apiJson('/api/analytics/summary'),
+      apiJson('/api/analytics/log?n=50'),
+    ]);
+    el('an-total').textContent = sum.total||0;
+    el('an-today').textContent = sum.today||0;
+    el('an-score').textContent = sum.avgScore||'—';
+    el('an-niche').textContent = (sum.topNiche||'—').slice(0,10);
+
+    if (!log.length) {
+      html('an-log','<div style="color:#2a2a2a;font-family:\'DM Mono\',monospace;font-size:12px;text-align:center;padding:30px 0">Nema podataka. Pokreni pipeline da generiše videa.</div>');
+    } else {
+      html('an-log',log.map(e=>`
+        <div class="pipe-row">
+          <div class="pipe-dot" style="background:${e.score>=7?'var(--green)':e.score>=5?'var(--orange)':'var(--red)'}"></div>
+          <div style="flex:1">
+            <div class="pipe-title">${e.title||'—'}</div>
+            <div style="font-size:11px;color:#333;font-family:'DM Mono',monospace">${e.niche||''} · ${e.topic||''}</div>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:#444;text-align:right">
+            <div style="color:${e.score>=7?'var(--green)':e.score>=5?'var(--orange)':'var(--red)'};font-family:'Bebas Neue',sans-serif;font-size:20px">${e.score||0}/10</div>
+            <div style="color:#444">${e.viralScore||0}/100 viral</div>
+          </div>
+          <div class="pipe-ts">${e.ts?new Date(e.ts).toLocaleString():''}</div>
+        </div>`).join(''));
+    }
+  } catch(e){ html('an-log',`<div class="err-box">✗ ${e.message}</div>`); }
+}
+
+// ══ AUTO PIPELINE PAGE ════════════════════════════════════════════════
+async function manualPipeline() {
+  const niche  = el('pipe-niche').value.trim() || 'AI Tools';
+  const topic  = el('pipe-topic').value.trim() || undefined;
+  const count  = normalizedCount(el('pipe-count').value, 1, 20, 3);
+  setBtn('btn-pipe',true,'POKRETANJE...');
+  try {
+    await apiJson('/api/pipeline/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({niche,topic,count:parseInt(count)})});
+    html('pipe-log',`<div class="card card-accent-green"><div style="color:var(--green);font-family:'DM Mono',monospace;font-size:12px">✓ Pipeline pokrenut: ${count}x "${niche}"${topic?' — '+topic:''}<br><br>Videa se generišu u pozadini. Provjeri Analytics za status i output/ folder za fajlove.</div></div>`);
+    toast('Pipeline pokrenut!','s');
+  } catch(e){
+    html('pipe-log',`<div class="err-box">✗ ${e.message}</div>`);
+    toast(e.message,'e');
+  } finally { setBtn('btn-pipe',false,'▶ POKRENI SADA'); }
+}
+
+// ══ SETTINGS ══════════════════════════════════════════════════════════
+async function loadSettingsPage() {
+  await cfg.syncFromServer();
+  const c = cfg.load();
+  const fields = {
+    'k-groq':'GROQ_API_KEY','k-ytcid':'YT_CLIENT_ID','k-ytcs':'YT_CLIENT_SECRET',
+    'k-yttoken':'YT_ACCESS_TOKEN','k-ttck':'TT_CLIENT_KEY','k-ttat':'TT_ACCESS_TOKEN',
+    'k-niche':'DEFAULT_NICHE','k-count':'DAILY_COUNT','k-platform':'DEFAULT_PLATFORM','k-promo':'PROMO_LINK',
+    'k-min-score':'MIN_SCRIPT_SCORE','k-max-script-attempts':'MAX_SCRIPT_ATTEMPTS',
+    'k-auto-upload':'AUTO_UPLOAD_ENABLED','k-upload-mode':'UPLOAD_MODE',
+    'k-upload-webhook-url':'UPLOAD_WEBHOOK_URL','k-upload-webhook-token':'UPLOAD_WEBHOOK_TOKEN',
+    'k-upload-timeout-ms':'UPLOAD_TIMEOUT_MS','k-upload-max-attempts':'UPLOAD_MAX_ATTEMPTS',
+  };
+  Object.entries(fields).forEach(([id,key])=>{
+    const inp = el(id);
+    if (inp && Object.prototype.hasOwnProperty.call(c, key)) inp.value = c[key];
+  });
+
+  // Status
+  const hasKey = !!c.GROQ_API_KEY;
+  const dot=el('set-status-dot');
+  if(dot){ dot.style.background=hasKey?'var(--green)':'var(--red)'; dot.style.boxShadow=hasKey?'0 0 8px var(--green)':'0 0 8px var(--red)'; }
+  const msg=el('set-status-msg');
+  if(msg){ msg.textContent=hasKey?'✓ Groq API ključ je postavljen — Aplikacija sprema za rad':'⚠ Groq API ključ nije postavljen — Dodaj ga ispod (BESPLATNO!)'; msg.style.color=hasKey?'var(--green)':'var(--red)'; }
+
+  // Mark set fields
+  Object.entries(fields).forEach(([id,key])=>{
+    const af=document.getElementById('af-'+id.replace('k-',''));
+    if(af) af.classList.toggle('ok', !!c[key]);
+  });
+}
+
+async function saveSettings() {
+  const fields = {
+    'k-groq':'GROQ_API_KEY','k-ytcid':'YT_CLIENT_ID','k-ytcs':'YT_CLIENT_SECRET',
+    'k-yttoken':'YT_ACCESS_TOKEN','k-ttck':'TT_CLIENT_KEY','k-ttat':'TT_ACCESS_TOKEN',
+    'k-niche':'DEFAULT_NICHE','k-count':'DAILY_COUNT','k-platform':'DEFAULT_PLATFORM','k-promo':'PROMO_LINK',
+    'k-min-score':'MIN_SCRIPT_SCORE','k-max-script-attempts':'MAX_SCRIPT_ATTEMPTS',
+    'k-auto-upload':'AUTO_UPLOAD_ENABLED','k-upload-mode':'UPLOAD_MODE',
+    'k-upload-webhook-url':'UPLOAD_WEBHOOK_URL','k-upload-webhook-token':'UPLOAD_WEBHOOK_TOKEN',
+    'k-upload-timeout-ms':'UPLOAD_TIMEOUT_MS','k-upload-max-attempts':'UPLOAD_MAX_ATTEMPTS',
+  };
+  const c = cfg.load();
+  Object.entries(fields).forEach(([id,key])=>{
+    const inp=el(id); if(inp) c[key]=inp.value.trim();
+  });
+  cfg.save(c);
+  try { await cfg.saveToServer(); }
+  catch(e){ toast('⚠ Server config save nije uspio: '+e.message,'w',4200); }
+  toast('✓ Ključevi sačuvani!','s');
+  await loadSettingsPage();
+  checkGroqStatus();
+}
+
+async function clearSettings() {
+  if(!confirm('Obrisati sve ključeve?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  cfg.save({});
+  try { await cfg.saveToServer(); } catch {}
+  await loadSettingsPage();
+  checkGroqStatus();
+  toast('Ključevi obrisani','i');
+}
+
+function toggleKey(id) {
+  const inp=el(id); if(!inp) return;
+  inp.type = inp.type==='password'?'text':'password';
+}
+
+async function testGroq() {
+  const key = (el('k-groq') ? el('k-groq').value.trim() : '') || cfg.get('GROQ_API_KEY');
+  if(!key){ toast('Upiši Groq API ključ','w'); return; }
+  setBtn('btn-test-groq',true,'TESTIRANJE...');
+  const resEl = el('set-test-result');
+  resEl.style.display='none';
+  try {
+    const res = await fetch(GROQ_URL,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},
+      body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:'Say OK only.'}],max_tokens:5}),
+    });
+    const d = await res.json();
+    const ok = !!(((d.choices||[])[0]||{}).message||{}).content;
+    resEl.style.display='block';
+    resEl.style.cssText=`display:block;padding:10px 12px;background:${ok?'rgba(0,230,118,.05)':'rgba(255,60,60,.05)'};border:1px solid ${ok?'rgba(0,230,118,.2)':'rgba(255,60,60,.2)'};font-family:'DM Mono',monospace;font-size:12px;color:${ok?'var(--green)':'var(--red)'};margin-top:10px`;
+    resEl.textContent = ok ? `✅ Groq radi! Model: llama-3.1-8b-instant · ${((d.usage||{}).total_tokens)||0} tokens korišteno` : `❌ Greška: ${((d.error||{}).message)||'Nepoznata greška'}`;
+    if(ok) toast('✅ Groq API radi!','s');
+    else   toast('❌ Neispravan ključ','e');
+  } catch(e){
+    resEl.style.cssText='display:block;padding:10px 12px;background:rgba(255,60,60,.05);border:1px solid rgba(255,60,60,.2);font-size:12px;color:var(--red);margin-top:10px';
+    resEl.textContent='❌ Network greška: '+e.message;
+  }
+  setBtn('btn-test-groq',false,'TESTIRAJ GROQ');
+}
+</script>
+</body>
+</html>

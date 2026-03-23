@@ -1,0 +1,6 @@
+## Copy to local.properties for local build (do NOT commit local.properties)
+## SDK
+sdk.dir=/path/to/Android/Sdk
+
+## Optional API override
+API_BASE_URL=https://blackbox2.onrender.com/
